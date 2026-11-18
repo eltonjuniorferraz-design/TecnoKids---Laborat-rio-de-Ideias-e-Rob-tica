@@ -1,0 +1,1955 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TecnoKids | Laboratório de Ideias, Lógica & Robótica</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: ui-rounded, "Trebuchet MS", system-ui, sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 45%, #fefce8 100%);
+            color: #1e293b;
+            min-height: 100vh;
+        }
+        h1, h2, h3, .font-display {
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        /* Animações Lúdicas */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.85); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes wireFlow {
+            to { stroke-dashoffset: -24; }
+        }
+        @keyframes spinGear {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes pulseRing {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+            70% { transform: scale(1.03); box-shadow: 0 0 0 12px rgba(245, 158, 11, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+        }
+
+        .animate-float {
+            animation: floatSlow 3s ease-in-out infinite;
+        }
+        .animate-pop {
+            animation: popIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .wire-active {
+            stroke-dasharray: 6, 6;
+            animation: wireFlow 0.5s linear infinite;
+        }
+        .gear-spin {
+            transform-origin: center;
+            animation: spinGear 2s linear infinite;
+        }
+        .block-executing {
+            animation: pulseRing 0.8s infinite;
+            border-color: #f59e0b !important;
+            background-color: #fef3c7 !important;
+            transform: scale(1.05);
+        }
+
+        :focus-visible { outline: 3px solid #f59e0b !important; outline-offset: 3px; }
+        button { touch-action: manipulation; }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
+        }
+        @media (max-width: 640px) {
+            header { position: static !important; }
+            #levelButtonsContainer { flex-wrap: wrap; justify-content: center; }
+            #tabBtn_logic, #tabBtn_maker, #tabBtn_gallery { min-height: 3.25rem; padding-inline: .35rem; gap: .25rem; }
+            #tabBtn_logic span:last-child, #tabBtn_maker span:last-child, #tabBtn_gallery span:last-child { font-size: .68rem; line-height: 1.05; }
+            #robotGrid { width: min(100%, 23rem) !important; }
+            #toast { left: 1rem; right: 1rem; bottom: 1rem; }
+        }
+
+        /* Botões estilo bloco 3D tátil para crianças */
+        .btn-3d {
+            transition: all 0.12s ease;
+            box-shadow: 0 4px 0 rgba(15, 23, 42, 0.2);
+        }
+        .btn-3d:active:not(:disabled) {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 rgba(15, 23, 42, 0.2);
+        }
+
+        /* Estilos de Impressão para Certificados / Mural */
+        @media print {
+            header, .no-print { display: none !important; }
+            body { background: #ffffff !important; }
+            .print-card { break-inside: avoid; border: 2px solid #cbd5e1 !important; box-shadow: none !important; }
+        }
+        .portal-bg { background: radial-gradient(circle at 10% 15%, #dbeafe 0, transparent 32%), radial-gradient(circle at 90% 20%, #fef3c7 0, transparent 28%), linear-gradient(135deg, #f8fafc, #eef2ff); }
+        .portal-card { box-shadow: 0 18px 50px rgba(30, 41, 59, .12); }
+        .qr-frame svg { display: block; width: min(100%, 17rem); height: auto; margin: auto; }
+    </style>
+</head>
+<body class="antialiased selection:bg-amber-300 selection:text-slate-900 pb-12">
+
+    <!-- PORTAL PROFESSOR / ALUNO -->
+    <section id="portalHome" class="portal-bg min-h-screen p-4 sm:p-8">
+        <div class="max-w-5xl mx-auto pt-8 sm:pt-14">
+            <div class="text-center mb-8 sm:mb-12">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-indigo-950 text-4xl shadow-lg mb-4">🤖</div>
+                <p class="text-sm font-extrabold uppercase tracking-widest text-indigo-600">TecnoKids • Laboratório de Ideias</p>
+                <h1 class="font-display text-3xl sm:text-5xl font-bold text-indigo-950 mt-2">Aprender, criar e apresentar!</h1>
+                <p class="text-slate-600 font-semibold mt-3 max-w-2xl mx-auto">Escolha seu espaço. O professor prepara a atividade e compartilha o acesso; cada aluno cria no próprio dispositivo.</p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-5 sm:gap-7">
+                <article class="portal-card bg-white rounded-3xl p-6 sm:p-8 border-2 border-indigo-100">
+                    <div class="text-4xl mb-3">👩‍🏫</div>
+                    <h2 class="font-display text-2xl font-bold text-indigo-950">Espaço do Professor</h2>
+                    <p class="text-slate-600 mt-2 leading-relaxed">Crie uma sala, gere um link e QR Code para a turma e reúna os projetos no mural de apresentação.</p>
+                    <button type="button" onclick="openTeacherPortal()" class="btn-3d mt-6 w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold">Preparar atividade</button>
+                </article>
+                <article class="portal-card bg-white rounded-3xl p-6 sm:p-8 border-2 border-amber-100">
+                    <div class="text-4xl mb-3">🧑‍🚀</div>
+                    <h2 class="font-display text-2xl font-bold text-indigo-950">Espaço do Aluno</h2>
+                    <p class="text-slate-600 mt-2 leading-relaxed">Acesse pelo QR Code da sala, explore as estações e crie um projeto para apresentar à turma.</p>
+                    <div class="mt-5 flex flex-col sm:flex-row gap-2">
+                        <input id="studentRoomCodeInput" type="text" maxlength="8" placeholder="Código da sala (opcional)" aria-label="Código da sala" class="min-w-0 flex-1 rounded-xl border-2 border-slate-200 px-3 py-2 font-bold uppercase">
+                        <button type="button" onclick="openStudentPortalFromCode()" class="btn-3d px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold">Entrar</button>
+                    </div>
+                </article>
+            </div>
+            <p class="text-center text-xs text-slate-500 mt-8">🔒 Não informe nomes completos ou dados pessoais. Os projetos ficam no dispositivo até serem exportados e enviados ao professor.</p>
+        </div>
+    </section>
+
+    <section id="teacherPortal" class="portal-bg min-h-screen p-4 sm:p-8 hidden">
+        <div class="max-w-5xl mx-auto">
+            <button type="button" onclick="goPortalHome()" class="mb-5 text-sm font-bold text-indigo-700 hover:text-indigo-950">← Início</button>
+            <div class="grid lg:grid-cols-[1fr_22rem] gap-6 items-start">
+                <article class="bg-white rounded-3xl p-6 sm:p-8 shadow-lg border-2 border-indigo-100">
+                    <p class="text-sm font-extrabold uppercase tracking-widest text-indigo-600">Espaço do Professor</p>
+                    <h1 class="font-display text-3xl font-bold text-indigo-950 mt-2">Prepare a sala da turma</h1>
+                    <p class="text-slate-600 mt-2">Compartilhe o acesso. Os alunos criam em seus aparelhos e depois enviam os projetos para você importar neste mural.</p>
+                    <p class="mt-3 rounded-xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-950">O link não tem senha: qualquer pessoa que o receber pode abrir a atividade. O nome e as orientações escolhidos vão no link; não use informações pessoais.</p>
+                    <label for="classTitleInput" class="block text-sm font-extrabold text-slate-700 mt-6 mb-1">Nome curto da atividade ou turma</label>
+                    <input id="classTitleInput" type="text" maxlength="48" placeholder="Ex.: Desafio das Invenções" class="w-full rounded-xl border-2 border-slate-200 px-4 py-3 font-bold text-slate-900">
+                    <label for="classInstructionsInput" class="block text-sm font-extrabold text-slate-700 mt-4 mb-1">Orientação para os alunos</label>
+                    <textarea id="classInstructionsInput" maxlength="180" rows="3" placeholder="O que a turma deve criar ou investigar?" class="w-full rounded-xl border-2 border-slate-200 px-4 py-3 text-slate-800"></textarea>
+                    <button type="button" onclick="createClassShare()" class="btn-3d mt-4 w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold">Criar link e QR Code</button>
+                    <button type="button" onclick="startNewTeacherRoom()" class="mt-3 w-full py-2 rounded-xl text-indigo-700 font-bold hover:bg-indigo-50">Começar outra sala</button>
+
+                    <div id="teacherShareResult" class="hidden mt-6 p-4 sm:p-5 rounded-2xl bg-indigo-50 border-2 border-indigo-100">
+                        <h2 class="font-display font-bold text-indigo-950">Acesso dos alunos</h2>
+                        <p id="teacherRoomSummary" class="text-sm text-slate-600 mt-1"></p>
+                        <label for="studentShareLink" class="block text-xs font-bold text-slate-600 mt-4 mb-1">Link para copiar</label>
+                        <div class="flex gap-2">
+                            <input id="studentShareLink" readonly class="min-w-0 flex-1 rounded-lg border border-slate-300 px-2 py-2 text-xs bg-white">
+                            <button type="button" onclick="copyStudentLink()" class="px-3 rounded-lg bg-slate-800 text-white font-bold text-xs">Copiar</button>
+                        </div>
+                        <p id="copyLinkStatus" class="sr-only" aria-live="polite"></p>
+                    </div>
+                </article>
+                <aside class="bg-white rounded-3xl p-6 shadow-lg border-2 border-amber-100">
+                    <h2 class="font-display text-xl font-bold text-indigo-950">Como chega ao mural?</h2>
+                    <ol class="mt-4 space-y-3 text-sm text-slate-600 list-decimal pl-5">
+                        <li>Compartilhe o QR Code ou o link com a turma.</li>
+                        <li>Cada aluno cria e exporta seu projeto em arquivo JSON.</li>
+                        <li>Selecione os arquivos recebidos abaixo para reuni-los.</li>
+                        <li>Abra o mural em tela grande e convide os alunos a apresentar.</li>
+                    </ol>
+                    <label for="studentWorkFiles" class="block mt-6 text-sm font-extrabold text-slate-700">Importar projetos dos alunos</label>
+                    <input id="studentWorkFiles" type="file" accept="application/json,.json" multiple onchange="importStudentWork(event)" class="block w-full mt-2 text-sm text-slate-600 file:mr-2 file:rounded-lg file:border-0 file:bg-amber-100 file:px-3 file:py-2 file:font-bold file:text-amber-900">
+                    <p id="importStatus" class="mt-3 text-sm font-bold text-emerald-700" aria-live="polite">Nenhum projeto importado ainda.</p>
+                    <button type="button" onclick="openTeacherGallery()" class="btn-3d mt-5 w-full py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold">Abrir mural para apresentação</button>
+                    <p class="text-xs text-slate-500 mt-3">Importar arquivos não os envia à internet; eles são lidos neste navegador.</p>
+                </aside>
+            </div>
+            <div id="teacherQrPanel" class="hidden mt-6 bg-white rounded-3xl p-6 sm:p-8 shadow-lg border-2 border-amber-100 text-center">
+                <h2 class="font-display text-2xl font-bold text-indigo-950">A turma pode escanear este código</h2>
+                <div id="teacherQrCode" class="qr-frame mx-auto mt-4 w-64 max-w-full rounded-2xl border-2 border-slate-100 p-3 bg-white" aria-label="QR Code para acessar a sala"></div>
+                <button type="button" onclick="downloadStudentQr()" class="mt-4 px-5 py-2 rounded-xl bg-slate-800 text-white font-bold">Baixar QR Code</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="studentPortal" class="portal-bg min-h-screen p-4 sm:p-8 hidden">
+        <div class="max-w-3xl mx-auto pt-6">
+            <button type="button" onclick="goPortalHome()" class="mb-5 text-sm font-bold text-indigo-700">← Início</button>
+            <article class="bg-white rounded-3xl p-6 sm:p-10 shadow-lg border-2 border-sky-100">
+                <div class="text-4xl">🧑‍🚀</div>
+                <p class="text-sm font-extrabold uppercase tracking-widest text-sky-700 mt-4">Espaço do Aluno</p>
+                <h1 id="studentClassTitle" class="font-display text-3xl sm:text-4xl font-bold text-indigo-950 mt-2">Vamos criar!</h1>
+                <p id="studentInstructions" class="text-slate-600 mt-3 leading-relaxed">Explore as estações, invente uma solução e prepare-se para apresentá-la.</p>
+                <label for="studentTeamAlias" class="block text-sm font-extrabold text-slate-700 mt-6 mb-1">Apelido da equipe</label>
+                <input id="studentTeamAlias" maxlength="40" type="text" placeholder="Ex.: Equipe Foguete" class="w-full rounded-xl border-2 border-slate-200 px-4 py-3 font-bold">
+                <button type="button" onclick="enterStudentGame()" class="btn-3d mt-5 w-full py-3 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-extrabold">Começar a atividade</button>
+                <div class="mt-6 rounded-2xl bg-amber-50 p-4 text-sm text-amber-950 border border-amber-200"><strong>Para apresentar:</strong> depois de salvar uma invenção no mural do seu aparelho, toque em “Baixar projeto para o professor” e envie o arquivo JSON pelo canal indicado na aula.</div>
+                <p class="text-xs text-slate-500 mt-4">Use um apelido de equipe. O trabalho fica neste dispositivo até você exportar o arquivo.</p>
+            </article>
+        </div>
+    </section>
+
+    <!-- CABEÇALHO PRINCIPAL & PAINEL DA TURMA -->
+    <header id="gameAppHeader" class="hidden bg-indigo-950 text-white border-b-4 border-indigo-700 sticky top-0 z-30 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-col lg:flex-row items-center justify-between gap-3">
+            <!-- Logo e Título -->
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 via-orange-500 to-rose-500 flex items-center justify-center shadow-lg border-2 border-white/30 text-2xl animate-float">
+                    🤖
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold tracking-wide flex items-center gap-2 text-amber-300">
+                        TecnoKids
+                        <span class="text-xs font-sans font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-indigo-800 text-sky-300 border border-indigo-600">
+                            Sala de Aula
+                        </span>
+                    </h1>
+                    <p class="text-xs text-indigo-200 font-semibold">Laboratório de Ideias, Lógica & Cultura Maker</p>
+                </div>
+            </div>
+
+            <!-- Identidade da Equipe / Aluno & Pontuação -->
+            <div class="flex flex-wrap items-center justify-center gap-2.5">
+                <!-- Nome da Equipe / Aluno -->
+                <div class="flex items-center gap-1.5 bg-indigo-900/90 border-2 border-indigo-700 rounded-xl px-3 py-1.5">
+                    <span class="text-base" title="Equipe ou Aluno">🧑‍🚀</span>
+                    <input type="text" id="teamNameInput" value="Equipe Exploradores" maxlength="40" onchange="updateTeamInfo()"
+                        aria-label="Nome da Equipe ou Aluno"
+                        class="bg-transparent text-white font-bold text-xs sm:text-sm w-36 sm:w-44 focus:outline-none focus:bg-indigo-800 rounded px-1.5 py-0.5"
+                        placeholder="Nome da Equipe...">
+                </div>
+
+                <!-- Placar de Estrelas e Medalhas -->
+                <div class="flex items-center gap-2 bg-slate-900/80 border-2 border-amber-400/50 rounded-xl px-3 py-1.5">
+                    <div class="flex items-center gap-1" title="Estrelas de Lógica conquistadas">
+                        <span class="text-base">⭐</span>
+                        <span id="starsCount" class="font-display font-bold text-amber-300 text-sm sm:text-base">0</span>
+                    </div>
+                    <div class="h-4 w-px bg-indigo-700"></div>
+                    <div class="flex items-center gap-1" title="Medalhas de Criatividade Maker">
+                        <span class="text-base">🏅</span>
+                        <span id="medalsCount" class="font-display font-bold text-emerald-300 text-sm sm:text-base">0</span>
+                    </div>
+                </div>
+
+                <!-- Botão Som On/Off -->
+                <button type="button" id="soundToggleBtn" onclick="toggleSound()"
+                    class="p-2 rounded-xl bg-indigo-800 hover:bg-indigo-700 border-2 border-indigo-600 text-white transition"
+                    title="Ativar ou silenciar efeitos sonoros">
+                    <span id="soundIcon" class="text-base">🔊</span>
+                </button>
+
+                <!-- Botão Guia do Professor (BNCC) -->
+                <button type="button" onclick="openTeacherModal()"
+                    class="btn-3d px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs sm:text-sm flex items-center gap-1.5">
+                    <span>👩‍🏫</span> Guia do Professor
+                </button>
+                <button type="button" onclick="goPortalHome()" class="px-3 py-2 rounded-xl bg-indigo-800 hover:bg-indigo-700 text-white text-xs font-bold">Trocar espaço</button>
+            </div>
+        </div>
+
+        <!-- NAVEGAÇÃO ENTRE AS 3 ESTAÇÕES DE APRENDIZAGEM -->
+        <div class="bg-indigo-900/95 border-t border-indigo-800 px-4 py-2">
+            <div class="max-w-7xl mx-auto grid grid-cols-3 gap-2 sm:gap-4" role="tablist" aria-label="Estações de aprendizagem">
+                <button type="button" id="tabBtn_logic" onclick="switchTab('logic')" onkeydown="navigateTabs(event, 'logic')" role="tab" aria-controls="station_logic" aria-selected="true"
+                    class="py-2.5 px-3 rounded-xl font-display font-bold text-xs sm:text-base flex items-center justify-center gap-2 transition bg-sky-500 text-white shadow-md border-2 border-sky-300">
+                    <span class="text-lg sm:text-xl">🧩</span>
+                    <span>1. Missões de Lógica</span>
+                </button>
+                <button type="button" id="tabBtn_maker" onclick="switchTab('maker')" onkeydown="navigateTabs(event, 'maker')" role="tab" aria-controls="station_maker" aria-selected="false" tabindex="-1"
+                    class="py-2.5 px-3 rounded-xl font-display font-bold text-xs sm:text-base flex items-center justify-center gap-2 transition bg-indigo-950/60 text-indigo-200 hover:bg-indigo-800 border-2 border-transparent">
+                    <span class="text-lg sm:text-xl">💡</span>
+                    <span>2. Oficina de Invenções</span>
+                </button>
+                <button type="button" id="tabBtn_gallery" onclick="switchTab('gallery')" onkeydown="navigateTabs(event, 'gallery')" role="tab" aria-controls="station_gallery" aria-selected="false" tabindex="-1"
+                    class="py-2.5 px-3 rounded-xl font-display font-bold text-xs sm:text-base flex items-center justify-center gap-2 transition bg-indigo-950/60 text-indigo-200 hover:bg-indigo-800 border-2 border-transparent">
+                    <span class="text-lg sm:text-xl">🏆</span>
+                    <span>3. Mural da Turma <span id="galleryBadgeCount" class="ml-1 px-1.5 py-0.2 text-xs rounded-full bg-amber-400 text-slate-900 font-sans font-extrabold">0</span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+    <p id="gamePrivacyNote" class="hidden max-w-7xl mx-auto px-4 sm:px-6 pt-3 text-xs sm:text-sm text-slate-600" role="note">
+        🔒 As criações e o progresso ficam somente neste navegador. Em computadores compartilhados, use apelidos de equipe e limpe os dados ao final da aula. O mural não é sincronizado entre dispositivos.
+    </p>
+
+    <!-- NOTIFICAÇÃO TOAST LÚDICA -->
+    <div id="toast" class="hidden fixed bottom-5 right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl border-2 border-amber-400 flex items-center gap-3 text-sm font-bold">
+        <span id="toastEmoji" class="text-2xl">🎉</span>
+        <span id="toastMsg">Muito bem!</span>
+    </div>
+
+    <!-- MODAL: GUIA PEDAGÓGICO DO PROFESSOR (BNCC & DINÂMICA DE AULA) -->
+    <div id="teacherModal" role="dialog" aria-modal="true" aria-labelledby="teacherModalTitle" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 backdrop-blur-xs p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-3xl w-full p-6 sm:p-8 shadow-2xl border-4 border-indigo-200 animate-pop my-8">
+            <div class="flex items-start justify-between gap-4 pb-4 border-b-2 border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-2xl shrink-0">
+                        👩‍🏫
+                    </div>
+                    <div>
+                        <h2 id="teacherModalTitle" class="text-xl sm:text-2xl font-bold text-indigo-950">Guia do Professor • Plano de Aula</h2>
+                        <p class="text-xs sm:text-sm text-slate-500 font-semibold">Alinhado à BNCC Computação (Pensamento Computacional & Cultura Digital)</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeTeacherModal()" class="p-2 rounded-xl bg-slate-100 hover:bg-rose-100 text-slate-600 hover:text-rose-600 font-bold transition">
+                    ✕
+                </button>
+            </div>
+
+            <div class="space-y-4 mt-5 text-sm text-slate-700 leading-relaxed max-h-[65vh] overflow-y-auto pr-1">
+                <div class="p-4 rounded-2xl bg-sky-50 border-2 border-sky-200">
+                    <h3 class="font-display font-bold text-sky-900 text-base mb-1">🎯 Objetivo da Atividade (45 a 90 min)</h3>
+                    <p>Desenvolver o raciocínio lógico, a decomposição de problemas e a criatividade tecnológica através da programação visual em blocos e da prototipagem de soluções para problemas reais da escola e da comunidade.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div class="p-3.5 rounded-2xl bg-indigo-50 border border-indigo-200">
+                        <span class="text-xs font-extrabold uppercase text-indigo-600">Etapa 1 (15 min)</span>
+                        <h4 class="font-display font-bold text-slate-900 mt-0.5">🧩 Missões de Lógica</h4>
+                        <p class="text-xs mt-1 text-slate-600">Trabalha sequenciamento, lateralidade (esquerda/direita), depuração (debug) e laços de repetição (loops) com o robô Bip.</p>
+                    </div>
+                    <div class="p-3.5 rounded-2xl bg-amber-50 border border-amber-200">
+                        <span class="text-xs font-extrabold uppercase text-amber-700">Etapa 2 (20 min)</span>
+                        <h4 class="font-display font-bold text-slate-900 mt-0.5">💡 Oficina Maker</h4>
+                        <p class="text-xs mt-1 text-slate-600">Introduz o conceito de <strong>Entrada (Sensor) → Processamento → Saída (Atuador)</strong> conectado a problemas reais.</p>
+                    </div>
+                    <div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200">
+                        <span class="text-xs font-extrabold uppercase text-emerald-700">Etapa 3 (15 min)</span>
+                        <h4 class="font-display font-bold text-slate-900 mt-0.5">🏆 Pitch & Votação</h4>
+                        <p class="text-xs mt-1 text-slate-600">As equipes apresentam suas invenções na lousa digital, explicam como ajudam as pessoas e votam nas ideias favoritas.</p>
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                    <h4 class="font-display font-bold text-slate-900">💡 Dicas de Mediação na Lousa Digital:</h4>
+                    <ul class="list-disc pl-5 space-y-1 text-xs sm:text-sm text-slate-600">
+                        <li><strong>Errou o caminho? Celebre!</strong> Mostre aos alunos como o destaque amarelo nos blocos ajuda a encontrar exatamente em qual passo o robô virou para o lado errado (depuração).</li>
+                        <li><strong>Desafio entre duplas:</strong> Use o modo <em>"Criar Minha Fase"</em> para um grupo desenhar um labirinto e o grupo vizinho resolver.</li>
+                        <li><strong>Privacidade:</strong> O progresso fica só neste navegador. Em dispositivos compartilhados, use nomes de equipe fictícios e reinicie os dados ao final da aula. O mural não é sincronizado entre computadores.</li>
+                        <li><strong>Continuidade:</strong> Exporte uma cópia JSON pelo Mural se quiser guardar as ideias. Revise os nomes de equipe antes de compartilhar o arquivo.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+                <button type="button" onclick="resetClassroomProgress()" class="px-4 py-2 rounded-xl text-xs font-bold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition">
+                    🔄 Reiniciar Placar da Turma
+                </button>
+                <button type="button" onclick="closeTeacherModal()" class="btn-3d px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm">
+                    Entendi, Vamos Começar! 🚀
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main id="gameAppMain" class="hidden max-w-7xl mx-auto px-4 sm:px-6 pt-6">
+
+        <!-- ===================================================================== -->
+        <!-- ESTAÇÃO 1: MISSÕES DE LÓGICA & PROGRAMAÇÃO EM BLOCOS                  -->
+        <!-- ===================================================================== -->
+        <section id="station_logic" role="tabpanel" aria-labelledby="tabBtn_logic" class="space-y-6 animate-pop">
+            <!-- Barra Superior de Níveis e Editor -->
+            <div class="bg-white rounded-3xl p-4 sm:p-5 shadow-md border-2 border-sky-200 flex flex-col lg:flex-row items-center justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-sky-100 text-sky-800">Pensamento Computacional</span>
+                        <h2 id="levelTitle" class="text-lg sm:text-xl font-bold text-slate-900">Fase 1: Primeiros Passos do Bip</h2>
+                    </div>
+                    <p id="levelHint" class="text-xs sm:text-sm text-slate-600 font-semibold mt-0.5">
+                        Ajude o robô Bip 🤖 a pegar a bateria ⚡ e chegar até o portal 🌟!
+                    </p>
+                </div>
+
+                <!-- Seletor de Fases + Modo Editor -->
+                <div class="flex flex-wrap items-center justify-center gap-2">
+                    <div id="levelButtonsContainer" class="flex items-center gap-1.5">
+                        <!-- Gerado via JS -->
+                    </div>
+                    <button type="button" id="toggleEditorBtn" onclick="toggleMapEditor()"
+                        class="btn-3d px-3.5 py-2 rounded-xl text-xs sm:text-sm font-extrabold bg-purple-600 hover:bg-purple-500 text-white flex items-center gap-1.5">
+                        <span>🛠️</span> <span id="editorBtnLabel">Criar Minha Fase</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Barra de Ferramentas do Editor (Visível apenas quando ativo) -->
+            <div id="mapEditorToolbar" class="hidden bg-purple-900 text-white rounded-2xl p-4 shadow-lg border-2 border-purple-400 flex flex-col sm:flex-row items-center justify-between gap-3 animate-pop">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">🎨</span>
+                    <div>
+                        <h3 class="font-display font-bold text-sm sm:text-base text-amber-300">Modo Construtor de Fases Ativo!</h3>
+                        <p class="text-xs text-purple-200">Escolha uma peça abaixo e clique nos quadrados do tabuleiro para montar seu desafio:</p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <button type="button" onclick="selectBrush('wall')" id="brush_wall" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-400 text-slate-950 border-2 border-white">🧱 Bloco</button>
+                    <button type="button" onclick="selectBrush('water')" id="brush_water" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-purple-800 text-white border border-purple-500">💧 Poça</button>
+                    <button type="button" onclick="selectBrush('item')" id="brush_item" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-purple-800 text-white border border-purple-500">⚡ Peça</button>
+                    <button type="button" onclick="selectBrush('goal')" id="brush_goal" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-purple-800 text-white border border-purple-500">🌟 Portal</button>
+                    <button type="button" onclick="selectBrush('robot')" id="brush_robot" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-purple-800 text-white border border-purple-500">🤖 Bip</button>
+                    <button type="button" onclick="selectBrush('empty')" id="brush_empty" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-purple-800 text-white border border-purple-500">🧹 Limpar</button>
+                </div>
+            </div>
+
+            <!-- Área Principal: Tabuleiro (Esquerda) + Blocos de Programação (Direita) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                <!-- Coluna do Tabuleiro 6x6 (6 colunas) -->
+                <div class="lg:col-span-6 bg-white rounded-3xl p-5 shadow-md border-2 border-slate-200 flex flex-col items-center">
+                    <div class="w-full flex items-center justify-between mb-3 px-1">
+                        <span class="text-xs font-extrabold uppercase tracking-wider text-slate-400">Arena Robótica 6×6</span>
+                        <div class="flex items-center gap-3 text-xs font-bold">
+                            <span class="text-amber-600">⚡ Peças: <strong id="collectedItemsDisplay">0/1</strong></span>
+                            <span class="text-indigo-600" id="robotDirectionDisplay">Direção: Direita ➡️</span>
+                        </div>
+                    </div>
+
+                    <!-- Grid 6x6 -->
+                    <div id="robotGrid" role="grid" aria-label="Tabuleiro de 6 por 6 do robô Bip" class="grid grid-cols-6 gap-1.5 sm:gap-2 bg-slate-800 p-2.5 sm:p-3 rounded-2xl shadow-inner w-full max-w-[420px] aspect-square">
+                        <!-- Células geradas via JS -->
+                    </div>
+
+                    <!-- Legenda Visual -->
+                    <div class="mt-4 flex flex-wrap items-center justify-center gap-3 text-xs font-bold text-slate-600 bg-slate-50 px-4 py-2 rounded-xl border border-slate-200 w-full">
+                        <span>🤖 Bip</span>
+                        <span>⚡ Coletar</span>
+                        <span>🌟 Chegada</span>
+                        <span>🧱 Obstáculo</span>
+                        <span>💧 Água</span>
+                    </div>
+                </div>
+
+                <!-- Coluna de Comandos e Sequência (6 colunas) -->
+                <div class="lg:col-span-6 bg-white rounded-3xl p-5 shadow-md border-2 border-slate-200 space-y-5">
+                    <!-- Paleta de Blocos Disponíveis -->
+                    <div>
+                        <h3 class="text-sm font-extrabold uppercase tracking-wider text-slate-500 mb-2.5 flex items-center justify-between">
+                            <span>1. Clique nos blocos para programar o Bip:</span>
+                            <span class="text-xs font-semibold text-indigo-600" id="maxBlocksHint">Máx: 14 blocos</span>
+                        </h3>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                            <button type="button" onclick="addCommand('FORWARD')"
+                                class="btn-3d py-3 px-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-white font-display font-bold text-sm sm:text-base flex items-center justify-center gap-2">
+                                <span>⬆️</span> Avançar
+                            </button>
+                            <button type="button" onclick="addCommand('LEFT')"
+                                class="btn-3d py-3 px-3 rounded-2xl bg-sky-500 hover:bg-sky-400 text-white font-display font-bold text-sm sm:text-base flex items-center justify-center gap-2">
+                                <span>↩️</span> Virar Esq.
+                            </button>
+                            <button type="button" onclick="addCommand('RIGHT')"
+                                class="btn-3d py-3 px-3 rounded-2xl bg-indigo-500 hover:bg-indigo-400 text-white font-display font-bold text-sm sm:text-base flex items-center justify-center gap-2">
+                                <span>↪️</span> Virar Dir.
+                            </button>
+                            <button type="button" onclick="addCommand('JUMP')"
+                                class="btn-3d py-3 px-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-display font-bold text-sm sm:text-base flex items-center justify-center gap-2">
+                                <span>🦘</span> Pular Poça
+                            </button>
+                            <button type="button" onclick="addCommand('REPEAT2')"
+                                class="btn-3d py-3 px-3 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-display font-bold text-sm sm:text-base flex items-center justify-center gap-1.5"
+                                title="Repete o próximo bloco 2 vezes">
+                                <span>🔁</span> Repetir 2x
+                            </button>
+                            <button type="button" onclick="addCommand('REPEAT3')"
+                                class="btn-3d py-3 px-3 rounded-2xl bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-display font-bold text-sm sm:text-base flex items-center justify-center gap-1.5"
+                                title="Repete o próximo bloco 3 vezes">
+                                <span>🔁</span> Repetir 3x
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Área de Montagem do Algoritmo -->
+                    <div class="bg-slate-100 rounded-2xl p-4 border-2 border-dashed border-slate-300 min-h-[190px] flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-extrabold uppercase tracking-wider text-slate-500">
+                                    2. Seu Algoritmo (Sequência de Passos):
+                                </span>
+                                <span id="programCountBadge" class="text-xs font-bold px-2 py-0.5 rounded-full bg-white text-slate-700 border border-slate-200">
+                                    0 blocos
+                                </span>
+                            </div>
+                            <div id="programSequenceBox" class="flex flex-wrap gap-2 items-center min-h-[110px] content-start">
+                                <!-- Blocos adicionados aparecem aqui -->
+                            </div>
+                        </div>
+
+                        <p class="text-[11px] text-slate-500 mt-3 pt-2 border-t border-slate-200/80">
+                            💡 Dica: Clique em um bloco da sequência para removê-lo. Use <strong>Repetir 2x/3x</strong> antes de um movimento para economizar blocos!
+                        </p>
+                    </div>
+
+                    <!-- Botões de Execução -->
+                    <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                        <button type="button" id="runCodeBtn" onclick="runProgram()"
+                            class="sm:col-span-6 btn-3d py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-display font-bold text-base sm:text-lg flex items-center justify-center gap-2 shadow-lg">
+                            <span>▶️</span> Executar Código!
+                        </button>
+                        <button type="button" onclick="resetRobotPosition()"
+                            class="sm:col-span-3 btn-3d py-3.5 px-3 rounded-2xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 border border-amber-300">
+                            <span>🔄</span> Reiniciar Bip
+                        </button>
+                        <button type="button" onclick="clearProgram()"
+                            class="sm:col-span-3 btn-3d py-3.5 px-3 rounded-2xl bg-rose-100 hover:bg-rose-200 text-rose-800 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 border border-rose-300">
+                            <span>🗑️</span> Limpar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- ESTAÇÃO 2: OFICINA DE INVENÇÕES (ESTÚDIO MAKER & IDEIAS)              -->
+        <!-- ===================================================================== -->
+        <section id="station_maker" role="tabpanel" aria-labelledby="tabBtn_maker" aria-hidden="true" class="hidden space-y-6 animate-pop">
+            <div class="bg-white rounded-3xl p-5 shadow-md border-2 border-amber-200 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800">Cultura Maker & Criatividade</span>
+                        <h2 class="text-lg sm:text-xl font-bold text-slate-900">Oficina de Invenções Tecnológicas</h2>
+                    </div>
+                    <p class="text-xs sm:text-sm text-slate-600 font-semibold mt-0.5">
+                        Combine um <strong>Problema Real</strong> + um <strong>Sensor</strong> + uma <strong>Ação</strong> para inventar uma solução incrível!
+                    </p>
+                </div>
+                <button type="button" onclick="randomizeInvention()"
+                    class="btn-3d px-4 py-2.5 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-display font-bold text-xs sm:text-sm flex items-center gap-2 shrink-0">
+                    <span>🎲</span> Sortear Ideia Maluca
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                <!-- Coluna Esquerda: Os 3 Pilares da Invenção (7 colunas) -->
+                <div class="lg:col-span-7 space-y-4">
+                    <!-- Pilar 1: Problema -->
+                    <div class="bg-white rounded-3xl p-5 shadow-sm border-2 border-rose-200">
+                        <h3 class="font-display font-bold text-base text-rose-900 mb-3 flex items-center gap-2">
+                            <span class="w-7 h-7 rounded-full bg-rose-500 text-white text-xs flex items-center justify-center">1</span>
+                            Qual problema queremos resolver?
+                        </h3>
+                        <div id="makerProblemsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                            <!-- Gerado via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Pilar 2: Sensor (Entrada) -->
+                    <div class="bg-white rounded-3xl p-5 shadow-sm border-2 border-sky-200">
+                        <h3 class="font-display font-bold text-base text-sky-900 mb-3 flex items-center gap-2">
+                            <span class="w-7 h-7 rounded-full bg-sky-500 text-white text-xs flex items-center justify-center">2</span>
+                            Qual Sensor vai perceber o ambiente? (Entrada)
+                        </h3>
+                        <div id="makerSensorsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                            <!-- Gerado via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Pilar 3: Ação / Atuador (Saída) -->
+                    <div class="bg-white rounded-3xl p-5 shadow-sm border-2 border-emerald-200">
+                        <h3 class="font-display font-bold text-base text-emerald-900 mb-3 flex items-center gap-2">
+                            <span class="w-7 h-7 rounded-full bg-emerald-500 text-white text-xs flex items-center justify-center">3</span>
+                            O que a máquina vai fazer? (Ação / Saída)
+                        </h3>
+                        <div id="makerActionsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                            <!-- Gerado via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coluna Direita: Bancada Visual Interativa & Ficha do Projeto (5 colunas) -->
+                <div class="lg:col-span-5 bg-white rounded-3xl p-5 shadow-md border-2 border-indigo-200 space-y-4 lg:sticky lg:top-36">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-extrabold uppercase tracking-wider text-indigo-600">Bancada de Protótipo</span>
+                        <button type="button" onclick="testPrototypeAnimation()"
+                            class="btn-3d px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-xs flex items-center gap-1.5">
+                            <span>⚡</span> Testar Invenção!
+                        </button>
+                    </div>
+
+                    <!-- Palco Visual SVG Conectando Sensor -> Cérebro -> Ação -->
+                    <div id="prototypeStage" class="bg-slate-900 rounded-2xl p-4 border-2 border-slate-700 relative overflow-hidden">
+                        <svg class="w-full h-44" viewBox="0 0 360 160">
+                            <!-- Fios de conexão -->
+                            <path d="M 85 80 L 145 80" stroke="#334155" stroke-width="5" stroke-linecap="round"/>
+                            <path id="wire1" d="M 85 80 L 145 80" stroke="#38bdf8" stroke-width="5" stroke-linecap="round" class="wire-active"/>
+
+                            <path d="M 215 80 L 275 80" stroke="#334155" stroke-width="5" stroke-linecap="round"/>
+                            <path id="wire2" d="M 215 80 L 275 80" stroke="#10b981" stroke-width="5" stroke-linecap="round" class="wire-active"/>
+
+                            <!-- Bloco Sensor (Entrada) -->
+                            <rect x="15" y="42" width="72" height="76" rx="16" fill="#0ea5e9" fill-opacity="0.2" stroke="#38bdf8" stroke-width="2.5"/>
+                            <text id="svgSensorEmoji" x="51" y="84" text-anchor="middle" font-size="30">👁️</text>
+                            <text x="51" y="134" text-anchor="middle" fill="#7dd3fc" font-size="10" font-weight="bold">SENSOR</text>
+
+                            <!-- Bloco Cérebro / Placa Robótica -->
+                            <rect x="145" y="36" width="70" height="88" rx="18" fill="#6366f1" stroke="#a5b4fc" stroke-width="3"/>
+                            <text id="svgBrainEmoji" x="180" y="85" text-anchor="middle" font-size="32">🧠</text>
+                            <text x="180" y="138" text-anchor="middle" fill="#c7d2fe" font-size="10" font-weight="bold">CÓDIGO</text>
+
+                            <!-- Bloco Ação (Saída) -->
+                            <rect x="273" y="42" width="72" height="76" rx="16" fill="#10b981" fill-opacity="0.2" stroke="#34d399" stroke-width="2.5"/>
+                            <text id="svgActionEmoji" x="309" y="84" text-anchor="middle" font-size="30">🦾</text>
+                            <text x="309" y="134" text-anchor="middle" fill="#6ee7b7" font-size="10" font-weight="bold">AÇÃO</text>
+                        </svg>
+
+                        <div id="prototypeLiveBanner" class="mt-1 text-center text-xs font-bold text-amber-300 bg-slate-800/90 py-1.5 px-3 rounded-xl border border-slate-700">
+                            Pronto para testar! Clique em "Testar Invenção!"
+                        </div>
+                    </div>
+
+                    <!-- Formulário de Registro da Ideia -->
+                    <div class="space-y-3">
+                        <div>
+                            <label for="invNameInput" class="block text-xs font-extrabold text-slate-700 mb-1">Nome da Nossa Invenção:</label>
+                            <input type="text" id="invNameInput" maxlength="60" placeholder="Ex: Lixeira Papa-Plástico 3000"
+                                class="w-full bg-slate-50 border-2 border-slate-200 focus:border-indigo-500 focus:bg-white rounded-xl px-3.5 py-2 text-sm font-bold text-slate-900 focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label for="invDescInput" class="block text-xs font-extrabold text-slate-700 mb-1">Como ela funciona e ajuda as pessoas?</label>
+                            <textarea id="invDescInput" rows="2" maxlength="240" placeholder="Explique com suas palavras como a invenção resolve o problema..."
+                                class="w-full bg-slate-50 border-2 border-slate-200 focus:border-indigo-500 focus:bg-white rounded-xl px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 focus:outline-none"></textarea>
+                        </div>
+
+                        <button type="button" onclick="saveInventionToGallery()"
+                            class="w-full btn-3d py-3.5 px-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-display font-bold text-base flex items-center justify-center gap-2 shadow-lg">
+                            <span>🏅</span> Salvar no Mural da Turma!
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- ESTAÇÃO 3: MURAL DE IDEIAS & GALERIA DA TURMA (APRESENTAÇÃO / PITCH)  -->
+        <!-- ===================================================================== -->
+        <section id="station_gallery" role="tabpanel" aria-labelledby="tabBtn_gallery" aria-hidden="true" class="hidden space-y-6 animate-pop">
+            <div class="bg-white rounded-3xl p-5 shadow-md border-2 border-emerald-200 flex flex-col md:flex-row items-center justify-between gap-4 no-print">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800">Apresentação & Votação</span>
+                        <h2 class="text-lg sm:text-xl font-bold text-slate-900">Mural de Invenções da Turma</h2>
+                    </div>
+                    <p class="text-xs sm:text-sm text-slate-600 font-semibold mt-0.5">
+                        Apresentem suas criações na lousa e cliquem em <strong>"Aplaudir ⭐"</strong> para votar nas ideias mais criativas!
+                    </p>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <button type="button" onclick="switchTab('maker')"
+                        class="btn-3d px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1.5">
+                        <span>➕</span> Nova Invenção
+                    </button>
+                    <button type="button" onclick="exportGalleryJSON()"
+                        class="btn-3d px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs flex items-center gap-1.5">
+                        <span>💾</span> Salvar Aula (.json)
+                    </button>
+                    <button type="button" onclick="exportStudentWork()"
+                        class="btn-3d px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs flex items-center gap-1.5">
+                        <span>📤</span> Baixar projeto para o professor
+                    </button>
+                    <button type="button" onclick="window.print()"
+                        class="btn-3d px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5">
+                        <span>🖨️</span> Imprimir Mural
+                    </button>
+                </div>
+            </div>
+
+            <!-- Grid de Cards das Invenções -->
+            <div id="galleryCardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Cards gerados via JS -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Biblioteca de QR Code (MIT, gerada no navegador; o link não é enviado ao serviço da biblioteca) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+    <!-- SCRIPT COMPLETO DO JOGO E SIMULADOR -->
+    <script>
+        const STORAGE_KEY = 'tecnokids_classroom_v1';
+
+        // --- SINTETIZADOR DE ÁUDIO (WEB AUDIO API - SEM ARQUIVOS EXTERNOS) ---
+        let soundEnabled = true;
+        let audioCtx = null;
+
+        function playTone(freq, type = 'sine', duration = 0.12, delay = 0) {
+            if (!soundEnabled) return;
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime + delay);
+
+                gain.gain.setValueAtTime(0.14, audioCtx.currentTime + delay);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay + duration);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(audioCtx.currentTime + delay);
+                osc.stop(audioCtx.currentTime + delay + duration);
+            } catch (e) {
+                // Ignora caso o navegador bloqueie áudio antes de interação
+            }
+        }
+
+        const sfx = {
+            click: () => playTone(520, 'triangle', 0.08),
+            step: () => playTone(380, 'sine', 0.09),
+            turn: () => playTone(460, 'triangle', 0.09),
+            jump: () => { playTone(420, 'sine', 0.1); playTone(660, 'sine', 0.14, 0.08); },
+            collect: () => { playTone(784, 'sine', 0.1); playTone(1046, 'sine', 0.18, 0.08); },
+            bump: () => playTone(160, 'sawtooth', 0.22),
+            win: () => {
+                playTone(523.25, 'triangle', 0.12, 0);
+                playTone(659.25, 'triangle', 0.12, 0.11);
+                playTone(783.99, 'triangle', 0.12, 0.22);
+                playTone(1046.50, 'triangle', 0.3, 0.33);
+            }
+        };
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('soundIcon').textContent = soundEnabled ? '🔊' : '🔇';
+            if (soundEnabled) sfx.click();
+        }
+
+        // --- DADOS DAS FASES DE LÓGICA (GRID 6x6) ---
+        // Legenda células: '.' vazio, '#' parede, 'W' poça d'água, 'I' peça/bateria, 'G' portal chegada
+        // Direções: 0 = Norte (Cima), 1 = Leste (Direita), 2 = Sul (Baixo), 3 = Oeste (Esquerda)
+        const levels = [
+            {
+                title: 'Fase 1: Primeiros Passos do Bip',
+                hint: 'Use Avançar e Virar à Direita para pegar a bateria ⚡ e chegar ao portal 🌟!',
+                maxBlocks: 10,
+                robot: { r: 2, c: 1, dir: 1 },
+                grid: [
+                    '......',
+                    '.####.',
+                    '..I.#.',
+                    '...#..',
+                    '...G..',
+                    '......'
+                ]
+            },
+            {
+                title: 'Fase 2: Desviando dos Blocos',
+                hint: 'Cuidado com as paredes 🧱! Planeje as curvas antes de apertar Executar.',
+                maxBlocks: 12,
+                robot: { r: 4, c: 1, dir: 0 },
+                grid: [
+                    '......',
+                    '.I..G.',
+                    '.##.#.',
+                    '....#.',
+                    '..#...',
+                    '......'
+                ]
+            },
+            {
+                title: 'Fase 3: O Salto sobre a Poça',
+                hint: 'Robôs não gostam de água 💧! Use o bloco "Pular Poça 🦘" para atravessar.',
+                maxBlocks: 12,
+                robot: { r: 3, c: 0, dir: 1 },
+                grid: [
+                    '......',
+                    '......',
+                    '....I.',
+                    '.W..#.',
+                    '....G.',
+                    '......'
+                ]
+            },
+            {
+                title: 'Fase 4: O Poder da Repetição (Loop)',
+                hint: 'Dica Ninja: Use "Repetir 3x 🔁" antes de "Avançar ⬆️" para andar 3 casas com apenas 2 blocos!',
+                maxBlocks: 8,
+                robot: { r: 4, c: 1, dir: 1 },
+                grid: [
+                    '......',
+                    '....G.',
+                    '....I.',
+                    '....I.',
+                    '......',
+                    '......'
+                ]
+            },
+            {
+                title: 'Fase 5: Desafio Mestre da Robótica',
+                hint: 'Combine curvas, saltos e repetições para coletar todas as 3 baterias ⚡!',
+                maxBlocks: 14,
+                robot: { r: 5, c: 0, dir: 0 },
+                grid: [
+                    '..I..G',
+                    '.##.W.',
+                    '.I....',
+                    '.W.##.',
+                    '......',
+                    '..I...'
+                ]
+            }
+        ];
+
+        // --- DADOS DA OFICINA MAKER ---
+        const makerCatalog = {
+            problems: [
+                { id: 'agua', emoji: '💧', label: 'Economizar Água' },
+                { id: 'lixo', emoji: '♻️', label: 'Reciclar o Lixo' },
+                { id: 'plantas', emoji: '🌱', label: 'Cuidar da Horta' },
+                { id: 'acessibilidade', emoji: '♿', label: 'Ajudar Pessoas' },
+                { id: 'energia', emoji: '⚡', label: 'Poupar Energia' },
+                { id: 'pets', emoji: '🐶', label: 'Cuidar dos Pets' }
+            ],
+            sensors: [
+                { id: 'movimento', emoji: '👁️', label: 'Sensor de Movimento' },
+                { id: 'luz', emoji: '☀️', label: 'Sensor de Luz / Sol' },
+                { id: 'voz', emoji: '🎤', label: 'Microfone / Voz' },
+                { id: 'umidade', emoji: '💦', label: 'Sensor de Umidade' },
+                { id: 'botao', emoji: '🔘', label: 'Botão Inteligente' },
+                { id: 'distancia', emoji: '📡', label: 'Radar Ultrassônico' }
+            ],
+            actions: [
+                { id: 'braco', emoji: '🦾', label: 'Braço Robótico' },
+                { id: 'alerta', emoji: '🚨', label: 'Luz LED & Som' },
+                { id: 'motor', emoji: '🛞', label: 'Rodas / Motor' },
+                { id: 'regador', emoji: '🚿', label: 'Regador Automático' },
+                { id: 'tela', emoji: '📺', label: 'Tela de Mensagem' },
+                { id: 'garra', emoji: '🧲', label: 'Ímã Separador' }
+            ]
+        };
+
+        // --- ESTADO GLOBAL DA APLICACÃO ---
+        let state = {
+            teamName: 'Equipe Exploradores',
+            roomCode: '',
+            stars: 0,
+            completedLevels: [],
+            currentLevelIdx: 0,
+            editorMode: false,
+            activeBrush: 'wall',
+            customLevel: null,
+            program: [],
+            makerSelection: {
+                problem: 'lixo',
+                sensor: 'movimento',
+                action: 'braco'
+            },
+            gallery: []
+        };
+
+        // Estado transitório da simulação do robô
+        let simGrid = [];
+        let simRobot = { r: 0, c: 0, dir: 1 };
+        let collectedCount = 0;
+        let totalItemsCount = 0;
+        let isRunning = false;
+        let activeTeacherSession = null;
+        let activeStudentSession = null;
+        let galleryFilterRoomCode = null;
+
+        // --- INICIALIZAÇÃO ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadFromStorage();
+            try { activeTeacherSession = JSON.parse(localStorage.getItem(TEACHER_SESSION_KEY) || 'null'); } catch { activeTeacherSession = null; }
+            galleryFilterRoomCode = activeTeacherSession?.code || null;
+            document.getElementById('teamNameInput').value = state.teamName;
+            renderLevelButtons();
+            loadLevel(state.currentLevelIdx, false);
+            renderMakerOptions();
+            updatePrototypeStage();
+            renderGallery();
+            updateScoreboard();
+            if (!window.location.hash) window.location.hash = '#inicio';
+            renderAppRoute();
+        });
+        window.addEventListener('hashchange', renderAppRoute);
+
+        function loadFromStorage() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) state = { ...state, ...parsed };
+                }
+            } catch (e) {
+                console.warn('Sem dados salvos anteriormente.');
+            }
+            state.teamName = typeof state.teamName === 'string' ? state.teamName.slice(0, 40) : 'Equipe Exploradores';
+            state.roomCode = typeof state.roomCode === 'string' ? state.roomCode.slice(0, 8).toUpperCase() : '';
+            state.stars = Number.isFinite(Number(state.stars)) ? Math.max(0, Number(state.stars)) : 0;
+            state.completedLevels = Array.isArray(state.completedLevels) ? [...new Set(state.completedLevels.filter(i => Number.isInteger(i) && i >= 0 && i < levels.length))] : [];
+            state.gallery = Array.isArray(state.gallery) ? state.gallery.filter(i => i && typeof i === 'object').slice(0, 100).map(i => ({
+                ...i,
+                id: String(i.id || ('inv_' + Math.random().toString(36).slice(2, 10))).replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40),
+                team: String(i.team || 'Equipe').slice(0, 40),
+                name: String(i.name || 'Invenção').slice(0, 60),
+                desc: String(i.desc || '').slice(0, 240),
+                votes: Math.max(0, Number(i.votes) || 0)
+            })) : [];
+            state.makerSelection = state.makerSelection && typeof state.makerSelection === 'object' ? state.makerSelection : { problem: 'lixo', sensor: 'movimento', action: 'braco' };
+            if (!makerCatalog.problems.some(x => x.id === state.makerSelection.problem)) state.makerSelection.problem = 'lixo';
+            if (!makerCatalog.sensors.some(x => x.id === state.makerSelection.sensor)) state.makerSelection.sensor = 'movimento';
+            if (!makerCatalog.actions.some(x => x.id === state.makerSelection.action)) state.makerSelection.action = 'braco';
+            const custom = state.customLevel;
+            const validGrid = custom && Array.isArray(custom.grid) && custom.grid.length === 6 && custom.grid.every(row => typeof row === 'string' && row.length === 6 && /^[.#WIG]{6}$/.test(row));
+            const validRobot = custom && custom.robot && Number.isInteger(custom.robot.r) && custom.robot.r >= 0 && custom.robot.r < 6 && Number.isInteger(custom.robot.c) && custom.robot.c >= 0 && custom.robot.c < 6 && Number.isInteger(custom.robot.dir) && custom.robot.dir >= 0 && custom.robot.dir < 4;
+            state.customLevel = validGrid && validRobot ? custom : null;
+            state.editorMode = Boolean(state.editorMode && state.customLevel);
+            if (!Array.isArray(state.program) || state.program.some(cmd => !commandMeta[cmd])) state.program = [];
+            if (!Number.isInteger(state.currentLevelIdx) || !levels[state.currentLevelIdx]) state.currentLevelIdx = 0;
+        }
+
+        function saveToStorage() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            } catch (e) {
+                console.warn('Não foi possível salvar no navegador.');
+            }
+        }
+
+        function updateTeamInfo() {
+            const val = document.getElementById('teamNameInput').value.trim();
+            state.teamName = (val || 'Equipe Exploradores').slice(0, 40);
+            document.getElementById('teamNameInput').value = state.teamName;
+            saveToStorage();
+        }
+
+        function updateScoreboard() {
+            document.getElementById('starsCount').textContent = state.stars;
+            const galleryCount = galleryFilterRoomCode ? state.gallery.filter(item => item.roomCode === galleryFilterRoomCode).length : state.gallery.length;
+            document.getElementById('medalsCount').textContent = galleryCount;
+            document.getElementById('galleryBadgeCount').textContent = galleryCount;
+        }
+
+        // --- NAVEGAÇÃO ENTRE ESTAÇÕES ---
+        function switchTab(tab) {
+            if (!['logic', 'maker', 'gallery'].includes(tab)) return;
+            sfx.click();
+            const stations = ['logic', 'maker', 'gallery'];
+            stations.forEach(s => {
+                const sec = document.getElementById(`station_${s}`);
+                const btn = document.getElementById(`tabBtn_${s}`);
+                if (s === tab) {
+                    sec.classList.remove('hidden');
+                    btn.className = 'py-2.5 px-3 rounded-xl font-display font-bold text-xs sm:text-base flex items-center justify-center gap-2 transition bg-sky-500 text-white shadow-md border-2 border-sky-300';
+                } else {
+                    sec.classList.add('hidden');
+                    btn.className = 'py-2.5 px-3 rounded-xl font-display font-bold text-xs sm:text-base flex items-center justify-center gap-2 transition bg-indigo-950/60 text-indigo-200 hover:bg-indigo-800 border-2 border-transparent';
+                }
+                btn.setAttribute('aria-selected', String(s === tab));
+                btn.setAttribute('tabindex', s === tab ? '0' : '-1');
+                sec.setAttribute('aria-hidden', String(s !== tab));
+            });
+        }
+
+        function navigateTabs(event, currentTab) {
+            if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+            event.preventDefault();
+            const tabs = ['logic', 'maker', 'gallery'];
+            let index = tabs.indexOf(currentTab);
+            if (event.key === 'ArrowRight') index = (index + 1) % tabs.length;
+            if (event.key === 'ArrowLeft') index = (index + tabs.length - 1) % tabs.length;
+            if (event.key === 'Home') index = 0;
+            if (event.key === 'End') index = tabs.length - 1;
+            const next = tabs[index];
+            switchTab(next);
+            document.getElementById(`tabBtn_${next}`).focus();
+        }
+
+        // --- MODAL GUIA DO PROFESSOR ---
+        let teacherModalReturnFocus = null;
+        function openTeacherModal() {
+            sfx.click();
+            teacherModalReturnFocus = document.activeElement;
+            const modal = document.getElementById('teacherModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeTeacherModal() {
+            sfx.click();
+            const modal = document.getElementById('teacherModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            if (teacherModalReturnFocus && teacherModalReturnFocus.focus) teacherModalReturnFocus.focus();
+        }
+
+        function resetClassroomProgress() {
+            if (!window.confirm('Apagar do navegador o progresso e o mural desta turma? Esta ação não pode ser desfeita.')) return;
+            localStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem(TEACHER_SESSION_KEY);
+            activeTeacherSession = null;
+            galleryFilterRoomCode = null;
+            state.stars = 0;
+            state.completedLevels = [];
+            state.program = [];
+            state.gallery = [];
+            state.customLevel = null;
+            state.editorMode = false;
+            document.getElementById('mapEditorToolbar').classList.add('hidden');
+            document.getElementById('editorBtnLabel').textContent = 'Criar Minha Fase';
+            renderGallery();
+            updateScoreboard();
+            renderLevelButtons();
+            loadLevel(0, false);
+            closeTeacherModal();
+            showToast('🔄', 'Placar reiniciado para a próxima turma!');
+        }
+
+        // =========================================================================
+        // LÓGICA DA ESTAÇÃO 1: PROGRAMAÇÃO EM BLOCOS & ROBÔ BIP
+        // =========================================================================
+
+        function renderLevelButtons() {
+            const container = document.getElementById('levelButtonsContainer');
+            container.innerHTML = '';
+            levels.forEach((lvl, idx) => {
+                const isDone = state.completedLevels.includes(idx);
+                const isCurrent = !state.editorMode && state.currentLevelIdx === idx;
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.setAttribute('aria-current', isCurrent ? 'step' : 'false');
+                btn.setAttribute('aria-label', `${lvl.title}${isDone ? ', concluída' : ''}${isCurrent ? ', atual' : ''}`);
+                btn.onclick = () => {
+                    if (state.editorMode) toggleMapEditor();
+                    loadLevel(idx);
+                };
+                btn.className = `w-9 h-9 sm:w-10 sm:h-10 rounded-xl font-display font-bold text-sm flex items-center justify-center border-2 transition ${
+                    isCurrent
+                        ? 'bg-sky-500 text-white border-sky-700 scale-105 shadow'
+                        : isDone
+                            ? 'bg-emerald-100 text-emerald-800 border-emerald-400'
+                            : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
+                }`;
+                btn.textContent = isDone && !isCurrent ? '⭐' : (idx + 1);
+                btn.title = lvl.title;
+                container.appendChild(btn);
+            });
+        }
+
+        function loadLevel(idx, playSound = true) {
+            if (isRunning) return;
+            if (!Number.isInteger(idx) || !levels[idx]) return;
+            if (playSound) sfx.click();
+            state.currentLevelIdx = idx;
+            const lvl = levels[idx];
+            document.getElementById('levelTitle').textContent = lvl.title;
+            document.getElementById('levelHint').textContent = lvl.hint;
+            document.getElementById('maxBlocksHint').textContent = `Máx: ${lvl.maxBlocks} blocos`;
+            state.program = [];
+            renderProgramSequence();
+            resetRobotPosition();
+            renderLevelButtons();
+        }
+
+        function resetRobotPosition() {
+            if (isRunning) return;
+            const source = state.editorMode && state.customLevel ? state.customLevel : levels[state.currentLevelIdx];
+            simGrid = source.grid.map(row => row.split(''));
+            simRobot = { ...source.robot };
+            collectedCount = 0;
+            totalItemsCount = 0;
+
+            for (let r = 0; r < 6; r++) {
+                for (let c = 0; c < 6; c++) {
+                    if (simGrid[r][c] === 'I') totalItemsCount++;
+                }
+            }
+            renderGrid();
+        }
+
+        function renderGrid() {
+            const gridEl = document.getElementById('robotGrid');
+            gridEl.innerHTML = '';
+
+            const dirIcons = ['⬆️', '➡️', '⬇️', '⬅️'];
+            const dirNames = ['Cima ⬆️', 'Direita ➡️', 'Baixo ⬇️', 'Esquerda ⬅️'];
+            document.getElementById('collectedItemsDisplay').textContent = `${collectedCount}/${totalItemsCount}`;
+            document.getElementById('robotDirectionDisplay').textContent = `Direção: ${dirNames[simRobot.dir]}`;
+
+            for (let r = 0; r < 6; r++) {
+                for (let c = 0; c < 6; c++) {
+                    const cellVal = simGrid[r][c];
+                    const isRobotHere = simRobot.r === r && simRobot.c === c;
+
+                    const cell = document.createElement('div');
+                    const cellLabels = { '#': 'bloco', W: 'poça', I: 'bateria', G: 'portal', '.': 'caminho vazio' };
+                    cell.setAttribute('role', state.editorMode ? 'button' : 'gridcell');
+                    cell.setAttribute('aria-label', `Linha ${r + 1}, coluna ${c + 1}: ${isRobotHere ? 'robô Bip' : cellLabels[cellVal] || 'caminho vazio'}${state.editorMode ? ', editar' : ''}`);
+                    if (state.editorMode) cell.setAttribute('tabindex', '0');
+                    let bgClass = (r + c) % 2 === 0 ? 'bg-slate-700' : 'bg-slate-700/80';
+                    if (cellVal === '#') bgClass = 'bg-amber-900/90 border-2 border-amber-700';
+                    if (cellVal === 'W') bgClass = 'bg-sky-600/80 border-2 border-sky-400';
+                    if (cellVal === 'G') bgClass = 'bg-emerald-600/80 border-2 border-emerald-300';
+
+                    cell.className = `${bgClass} rounded-xl flex items-center justify-center relative select-none transition-all duration-200 ${
+                        state.editorMode ? 'cursor-pointer hover:ring-2 hover:ring-amber-300' : ''
+                    }`;
+
+                    if (state.editorMode) {
+                        cell.onclick = () => handleEditorCellClick(r, c);
+                        cell.onkeydown = (event) => {
+                            if (event.key === 'Enter' || event.key === ' ') {
+                                event.preventDefault();
+                                handleEditorCellClick(r, c);
+                            }
+                        };
+                    }
+
+                    if (isRobotHere) {
+                        cell.innerHTML = `
+                            <div class="w-full h-full flex flex-col items-center justify-center bg-indigo-500/40 rounded-xl border-2 border-amber-300 animate-pop">
+                                <span class="text-2xl sm:text-3xl leading-none">🤖</span>
+                                <span class="text-[10px] leading-none mt-0.5">${dirIcons[simRobot.dir]}</span>
+                            </div>
+                        `;
+                    } else if (cellVal === '#') {
+                        cell.innerHTML = `<span class="text-xl sm:text-2xl">🧱</span>`;
+                    } else if (cellVal === 'W') {
+                        cell.innerHTML = `<span class="text-xl sm:text-2xl">💧</span>`;
+                    } else if (cellVal === 'I') {
+                        cell.innerHTML = `<span class="text-xl sm:text-2xl animate-pulse">⚡</span>`;
+                    } else if (cellVal === 'G') {
+                        cell.innerHTML = `<span class="text-2xl sm:text-3xl">🌟</span>`;
+                    }
+
+                    gridEl.appendChild(cell);
+                }
+            }
+        }
+
+        // --- MODO EDITOR DE FASES ---
+        function toggleMapEditor() {
+            if (isRunning) return;
+            sfx.click();
+            state.editorMode = !state.editorMode;
+            const toolbar = document.getElementById('mapEditorToolbar');
+            const label = document.getElementById('editorBtnLabel');
+
+            if (state.editorMode) {
+                toolbar.classList.remove('hidden');
+                label.textContent = 'Sair do Editor';
+                document.getElementById('levelTitle').textContent = 'Fase Personalizada da Turma 🛠️';
+                document.getElementById('levelHint').textContent = 'Clique no tabuleiro para desenhar seu próprio desafio e depois programe o Bip!';
+                document.getElementById('maxBlocksHint').textContent = 'Máx: 16 blocos';
+
+                if (!state.customLevel) {
+                    state.customLevel = {
+                        maxBlocks: 16,
+                        robot: { r: 0, c: 0, dir: 1 },
+                        grid: [
+                            '......',
+                            '..##..',
+                            '..I...',
+                            '......',
+                            '...W.G',
+                            '......'
+                        ]
+                    };
+                }
+                state.program = [];
+                renderProgramSequence();
+                resetRobotPosition();
+            } else {
+                toolbar.classList.add('hidden');
+                label.textContent = 'Criar Minha Fase';
+                loadLevel(state.currentLevelIdx, false);
+            }
+            renderLevelButtons();
+        }
+
+        function selectBrush(brush) {
+            sfx.click();
+            state.activeBrush = brush;
+            ['wall', 'water', 'item', 'goal', 'robot', 'empty'].forEach(b => {
+                const btn = document.getElementById(`brush_${b}`);
+                if (b === brush) {
+                    btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-400 text-slate-950 border-2 border-white';
+                } else {
+                    btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-purple-800 text-white border border-purple-500';
+                }
+            });
+        }
+
+        function handleEditorCellClick(r, c) {
+            if (!state.editorMode || isRunning) return;
+            sfx.click();
+            const gridMatrix = state.customLevel.grid.map(row => row.split(''));
+
+            if (state.activeBrush === 'robot') {
+                if (state.customLevel.robot.r === r && state.customLevel.robot.c === c) {
+                    state.customLevel.robot.dir = (state.customLevel.robot.dir + 1) % 4;
+                } else {
+                    state.customLevel.robot = { r, c, dir: 1 };
+                    gridMatrix[r][c] = '.';
+                }
+            } else {
+                if (state.customLevel.robot.r === r && state.customLevel.robot.c === c) return;
+                const charMap = { wall: '#', water: 'W', item: 'I', goal: 'G', empty: '.' };
+                gridMatrix[r][c] = charMap[state.activeBrush] || '.';
+            }
+
+            state.customLevel.grid = gridMatrix.map(row => row.join(''));
+            resetRobotPosition();
+        }
+
+        // --- MANIPULAÇÃO DOS BLOCOS DE CÓDIGO ---
+        const commandMeta = {
+            FORWARD: { label: 'Avançar', icon: '⬆️', color: 'bg-emerald-500 text-white border-emerald-700' },
+            LEFT: { label: 'Virar Esq.', icon: '↩️', color: 'bg-sky-500 text-white border-sky-700' },
+            RIGHT: { label: 'Virar Dir.', icon: '↪️', color: 'bg-indigo-500 text-white border-indigo-700' },
+            JUMP: { label: 'Pular Poça', icon: '🦘', color: 'bg-amber-400 text-slate-950 border-amber-600' },
+            REPEAT2: { label: 'Repetir 2x', icon: '🔁', color: 'bg-purple-600 text-white border-purple-800' },
+            REPEAT3: { label: 'Repetir 3x', icon: '🔁', color: 'bg-fuchsia-600 text-white border-fuchsia-800' }
+        };
+
+        function addCommand(cmd) {
+            if (isRunning) return;
+            const maxB = state.editorMode ? 16 : levels[state.currentLevelIdx].maxBlocks;
+            if (state.program.length >= maxB) {
+                sfx.bump();
+                showToast('⚠️', `Limite de ${maxB} blocos atingido! Tente usar Repetir 2x ou 3x.`);
+                return;
+            }
+            sfx.click();
+            state.program.push(cmd);
+            renderProgramSequence();
+        }
+
+        function removeCommand(index) {
+            if (isRunning) return;
+            sfx.click();
+            state.program.splice(index, 1);
+            renderProgramSequence();
+        }
+
+        function clearProgram() {
+            if (isRunning) return;
+            sfx.click();
+            state.program = [];
+            renderProgramSequence();
+            resetRobotPosition();
+        }
+
+        function renderProgramSequence() {
+            const box = document.getElementById('programSequenceBox');
+            const badge = document.getElementById('programCountBadge');
+            badge.textContent = `${state.program.length} ${state.program.length === 1 ? 'bloco' : 'blocos'}`;
+            box.innerHTML = '';
+
+            if (state.program.length === 0) {
+                box.innerHTML = `<span class="text-xs text-slate-400 font-semibold italic">Clique nos botões coloridos acima para montar os passos do robô...</span>`;
+                return;
+            }
+
+            state.program.forEach((cmd, idx) => {
+                const meta = commandMeta[cmd];
+                const chip = document.createElement('button');
+                chip.type = 'button';
+                chip.id = `prog_block_${idx}`;
+                chip.onclick = () => removeCommand(idx);
+                chip.title = 'Clique para remover este bloco';
+                chip.className = `${meta.color} px-2.5 py-1.5 rounded-xl border-b-4 font-display font-bold text-xs sm:text-sm flex items-center gap-1.5 shadow-xs hover:opacity-90 transition animate-pop`;
+                chip.innerHTML = `<span class="opacity-75 text-[10px]">${idx + 1}.</span> <span>${meta.icon}</span> <span>${meta.label}</span>`;
+                box.appendChild(chip);
+            });
+        }
+
+        // --- EXECUÇÃO PASSO A PASSO (COM EXPANSÃO DE LOOPS E DEBUG VISUAL) ---
+        async function runProgram() {
+            if (isRunning) return;
+            if (state.program.length === 0) {
+                sfx.bump();
+                showToast('🤖', 'Adicione pelo menos 1 bloco de comando primeiro!');
+                return;
+            }
+
+            resetRobotPosition();
+            if (state.editorMode && !simGrid.some(row => row.includes('G'))) {
+                showToast('🌟', 'Coloque ao menos um portal no tabuleiro antes de testar sua fase.');
+                return;
+            }
+            isRunning = true;
+            document.getElementById('runCodeBtn').disabled = true;
+
+            // Expande repetições mantendo referência ao índice do bloco visual para destaque
+            const executionQueue = [];
+            for (let i = 0; i < state.program.length; i++) {
+                const cmd = state.program[i];
+                if (cmd === 'REPEAT2' || cmd === 'REPEAT3') {
+                    const times = cmd === 'REPEAT2' ? 2 : 3;
+                    const nextCmd = state.program[i + 1];
+                    if (nextCmd && nextCmd !== 'REPEAT2' && nextCmd !== 'REPEAT3') {
+                        for (let t = 0; t < times; t++) {
+                            executionQueue.push({ action: nextCmd, blockIndex: i + 1, loopIndex: i });
+                        }
+                        i++; // Pula o próximo pois já foi absorvido pelo loop
+                    }
+                } else {
+                    executionQueue.push({ action: cmd, blockIndex: i, loopIndex: null });
+                }
+            }
+
+            const deltas = [
+                { dr: -1, dc: 0 }, // 0: Norte
+                { dr: 0, dc: 1 },  // 1: Leste
+                { dr: 1, dc: 0 },  // 2: Sul
+                { dr: 0, dc: -1 }  // 3: Oeste
+            ];
+
+            for (let step = 0; step < executionQueue.length; step++) {
+                const { action, blockIndex, loopIndex } = executionQueue[step];
+
+                // Destaca bloco atual
+                document.querySelectorAll('#programSequenceBox button').forEach(b => b.classList.remove('block-executing'));
+                const activeEl = document.getElementById(`prog_block_${blockIndex}`);
+                if (activeEl) activeEl.classList.add('block-executing');
+                if (loopIndex !== null) {
+                    const loopEl = document.getElementById(`prog_block_${loopIndex}`);
+                    if (loopEl) loopEl.classList.add('block-executing');
+                }
+
+                await sleep(420);
+
+                if (action === 'LEFT') {
+                    simRobot.dir = (simRobot.dir + 3) % 4;
+                    sfx.turn();
+                } else if (action === 'RIGHT') {
+                    simRobot.dir = (simRobot.dir + 1) % 4;
+                    sfx.turn();
+                } else if (action === 'FORWARD' || action === 'JUMP') {
+                    const stepDist = action === 'JUMP' ? 2 : 1;
+                    const nr = simRobot.r + deltas[simRobot.dir].dr * stepDist;
+                    const nc = simRobot.c + deltas[simRobot.dir].dc * stepDist;
+
+                    // Verifica limites do tabuleiro
+                    if (nr < 0 || nr >= 6 || nc < 0 || nc >= 6) {
+                        sfx.bump();
+                        showToast('🚧', 'Ops! O Bip chegou na borda da arena. Tente ajustar o caminho!');
+                        finishExecution();
+                        return;
+                    }
+
+                    // Se for salto, verifica se não bateu em parede no meio
+                    if (action === 'JUMP') {
+                        const midR = simRobot.r + deltas[simRobot.dir].dr;
+                        const midC = simRobot.c + deltas[simRobot.dir].dc;
+                        if (simGrid[midR][midC] === '#') {
+                            sfx.bump();
+                            showToast('🧱', 'O Bip não consegue pular por cima de paredes altas!');
+                            finishExecution();
+                            return;
+                        }
+                        sfx.jump();
+                    } else {
+                        sfx.step();
+                    }
+
+                    const targetCell = simGrid[nr][nc];
+                    if (targetCell === '#') {
+                        sfx.bump();
+                        showToast('🧱', 'Bateu no bloco! Use Virar à Esquerda ou Direita.');
+                        finishExecution();
+                        return;
+                    }
+                    if (targetCell === 'W') {
+                        sfx.bump();
+                        showToast('💧', 'Splash! O Bip caiu na poça. Use o bloco "Pular Poça 🦘"!');
+                        finishExecution();
+                        return;
+                    }
+
+                    simRobot.r = nr;
+                    simRobot.c = nc;
+
+                    if (targetCell === 'I') {
+                        simGrid[nr][nc] = '.';
+                        collectedCount++;
+                        sfx.collect();
+                    }
+                }
+
+                renderGrid();
+
+                // Verifica vitória ao chegar no portal
+                if (simGrid[simRobot.r][simRobot.c] === 'G') {
+                    if (collectedCount >= totalItemsCount) {
+                        sfx.win();
+                        handleLevelVictory();
+                        finishExecution();
+                        return;
+                    } else {
+                        sfx.bump();
+                        showToast('⚡', `Falta pegar ${totalItemsCount - collectedCount} bateria(s) antes de entrar no portal!`);
+                        finishExecution();
+                        return;
+                    }
+                }
+            }
+
+            // Terminou os blocos sem chegar no portal
+            sfx.bump();
+            showToast('🤔', 'O código terminou antes de chegar ao portal 🌟. Adicione mais blocos!');
+            finishExecution();
+        }
+
+        function finishExecution() {
+            isRunning = false;
+            document.getElementById('runCodeBtn').disabled = false;
+            document.querySelectorAll('#programSequenceBox button').forEach(b => b.classList.remove('block-executing'));
+        }
+
+        function handleLevelVictory() {
+            if (!state.editorMode && !state.completedLevels.includes(state.currentLevelIdx)) {
+                state.completedLevels.push(state.currentLevelIdx);
+                state.stars += 3;
+                saveToStorage();
+                updateScoreboard();
+                renderLevelButtons();
+                showToast('🏆', `Parabéns ${state.teamName}! +3 Estrelas de Lógica conquistadas!`);
+            } else {
+                showToast('🎉', 'Missão concluída com sucesso! Que tal testar a próxima fase ou criar uma?');
+            }
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // =========================================================================
+        // LÓGICA DA ESTAÇÃO 2: OFICINA DE INVENÇÕES MAKER
+        // =========================================================================
+
+        function renderMakerOptions() {
+            renderOptionGroup('makerProblemsGrid', makerCatalog.problems, 'problem', 'border-rose-500 bg-rose-50 text-rose-950');
+            renderOptionGroup('makerSensorsGrid', makerCatalog.sensors, 'sensor', 'border-sky-500 bg-sky-50 text-sky-950');
+            renderOptionGroup('makerActionsGrid', makerCatalog.actions, 'action', 'border-emerald-500 bg-emerald-50 text-emerald-950');
+        }
+
+        function renderOptionGroup(containerId, items, key, activeClasses) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            items.forEach(item => {
+                const isSelected = state.makerSelection[key] === item.id;
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.setAttribute('aria-pressed', String(isSelected));
+                btn.setAttribute('aria-label', `${item.label}${isSelected ? ', selecionado' : ''}`);
+                btn.onclick = () => {
+                    sfx.click();
+                    state.makerSelection[key] = item.id;
+                    renderMakerOptions();
+                    updatePrototypeStage();
+                };
+                btn.className = `p-3 rounded-2xl border-2 text-left flex flex-col items-center justify-center gap-1 transition ${
+                    isSelected
+                        ? `${activeClasses} shadow-sm scale-[1.02]`
+                        : 'border-slate-200 bg-slate-50/70 hover:bg-white text-slate-700'
+                }`;
+                btn.innerHTML = `
+                    <span class="text-2xl">${item.emoji}</span>
+                    <span class="text-xs font-extrabold text-center leading-tight">${item.label}</span>
+                `;
+                container.appendChild(btn);
+            });
+        }
+
+        function updatePrototypeStage() {
+            const prob = makerCatalog.problems.find(p => p.id === state.makerSelection.problem);
+            const sens = makerCatalog.sensors.find(s => s.id === state.makerSelection.sensor);
+            const act = makerCatalog.actions.find(a => a.id === state.makerSelection.action);
+
+            document.getElementById('svgSensorEmoji').textContent = sens ? sens.emoji : '👁️';
+            document.getElementById('svgActionEmoji').textContent = act ? act.emoji : '🦾';
+            document.getElementById('prototypeLiveBanner').textContent =
+                `Missão: ${prob.label} • ${sens.label} ➜ ${act.label}`;
+        }
+
+        function testPrototypeAnimation() {
+            sfx.win();
+            const prob = makerCatalog.problems.find(p => p.id === state.makerSelection.problem);
+            const sens = makerCatalog.sensors.find(s => s.id === state.makerSelection.sensor);
+            const act = makerCatalog.actions.find(a => a.id === state.makerSelection.action);
+
+            const banner = document.getElementById('prototypeLiveBanner');
+            banner.className = 'mt-1 text-center text-xs font-extrabold text-slate-950 bg-amber-400 py-1.5 px-3 rounded-xl border border-amber-200 animate-pulse';
+            banner.textContent = `⚡ TESTANDO: ${sens.emoji} detectou sinal ➜ ${act.emoji} ativado para ${prob.label}!`;
+
+            setTimeout(() => {
+                banner.className = 'mt-1 text-center text-xs font-bold text-amber-300 bg-slate-800/90 py-1.5 px-3 rounded-xl border border-slate-700';
+                updatePrototypeStage();
+            }, 3200);
+        }
+
+        function randomizeInvention() {
+            sfx.jump();
+            const rand = (arr) => arr[Math.floor(Math.random() * arr.length)].id;
+            state.makerSelection.problem = rand(makerCatalog.problems);
+            state.makerSelection.sensor = rand(makerCatalog.sensors);
+            state.makerSelection.action = rand(makerCatalog.actions);
+            renderMakerOptions();
+            updatePrototypeStage();
+            showToast('🎲', 'Nova combinação sorteada! Dê um nome criativo para ela.');
+        }
+
+        function saveInventionToGallery() {
+            const nameInput = document.getElementById('invNameInput');
+            const descInput = document.getElementById('invDescInput');
+            const name = nameInput.value.trim();
+            const desc = descInput.value.trim();
+
+            if (!name) {
+                sfx.bump();
+                showToast('✏️', 'Dê um nome bem criativo para sua invenção antes de salvar!');
+                nameInput.focus();
+                return;
+            }
+            if (name.length > 60 || desc.length > 240) {
+                showToast('✏️', 'Use até 60 caracteres no nome e 240 na descrição.');
+                return;
+            }
+            if (state.gallery.length >= 100) {
+                showToast('📚', 'O mural chegou ao limite de 100 ideias. Exporte a galeria antes de continuar.');
+                return;
+            }
+
+            const prob = makerCatalog.problems.find(p => p.id === state.makerSelection.problem);
+            const sens = makerCatalog.sensors.find(s => s.id === state.makerSelection.sensor);
+            const act = makerCatalog.actions.find(a => a.id === state.makerSelection.action);
+
+            const newInvention = {
+                id: 'inv_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 7),
+                team: state.teamName,
+                roomCode: state.roomCode,
+                name,
+                problemId: prob.id,
+                sensorId: sens.id,
+                actionId: act.id,
+                desc: desc || `Usa ${sens.label} para acionar ${act.label} e ajudar a ${prob.label.toLowerCase()}.`,
+                votes: 0
+            };
+
+            state.gallery.unshift(newInvention);
+            state.stars += 2;
+            saveToStorage();
+            updateScoreboard();
+            renderGallery();
+
+            nameInput.value = '';
+            descInput.value = '';
+            sfx.win();
+            switchTab('gallery');
+            showToast('🏅', 'Invenção publicada no Mural da Turma! +2 Estrelas!');
+        }
+
+        // =========================================================================
+        // LÓGICA DA ESTAÇÃO 3: MURAL DE IDEIAS & GALERIA DA TURMA
+        // =========================================================================
+
+        function renderGallery() {
+            const grid = document.getElementById('galleryCardsGrid');
+            grid.innerHTML = '';
+            const galleryItems = galleryFilterRoomCode ? state.gallery.filter(item => item.roomCode === galleryFilterRoomCode) : state.gallery;
+
+            if (galleryItems.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full bg-white rounded-3xl p-10 text-center border-2 border-dashed border-slate-300">
+                        <p class="text-4xl mb-2">💡</p>
+                        <h3 class="font-display font-bold text-lg text-slate-800">Nenhuma invenção no mural ainda!</h3>
+                        <p class="text-sm text-slate-500 mt-1">Vá até a Oficina de Invenções para criar o primeiro protótipo da turma.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            galleryItems.forEach(item => {
+                const prob = makerCatalog.problems.find(p => p.id === item.problemId) || makerCatalog.problems[0];
+                const sens = makerCatalog.sensors.find(s => s.id === item.sensorId) || makerCatalog.sensors[0];
+                const act = makerCatalog.actions.find(a => a.id === item.actionId) || makerCatalog.actions[0];
+
+                const card = document.createElement('article');
+                card.className = 'print-card bg-white rounded-3xl p-5 shadow-md border-2 border-slate-200 flex flex-col justify-between hover:border-indigo-300 transition animate-pop';
+                card.innerHTML = `
+                    <div>
+                        <!-- Cabeçalho do Card -->
+                        <div class="flex items-center justify-between gap-2 mb-3">
+                            <span class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-indigo-50 text-indigo-700 border border-indigo-200 truncate">
+                                🧑‍🚀 ${escapeHtml(item.team)}
+                            </span>
+                            <button type="button" onclick="deleteInvention('${item.id}')" title="Remover do mural"
+                                class="no-print text-slate-300 hover:text-rose-500 text-xs font-bold p-1 transition">
+                                ✕
+                            </button>
+                        </div>
+
+                        <!-- Título -->
+                        <h3 class="font-display font-bold text-lg text-slate-900 leading-snug mb-2">
+                            ${escapeHtml(item.name)}
+                        </h3>
+
+                        <!-- Arquitetura Visual (Problema -> Sensor -> Ação) -->
+                        <div class="grid grid-cols-3 gap-1.5 bg-slate-50 p-2.5 rounded-2xl border border-slate-200/80 text-center my-3">
+                            <div class="bg-white p-1.5 rounded-xl border border-rose-100">
+                                <span class="text-lg block">${prob.emoji}</span>
+                                <span class="text-[10px] font-extrabold text-rose-700 block truncate">${prob.label}</span>
+                            </div>
+                            <div class="bg-white p-1.5 rounded-xl border border-sky-100">
+                                <span class="text-lg block">${sens.emoji}</span>
+                                <span class="text-[10px] font-extrabold text-sky-700 block truncate">${sens.label}</span>
+                            </div>
+                            <div class="bg-white p-1.5 rounded-xl border border-emerald-100">
+                                <span class="text-lg block">${act.emoji}</span>
+                                <span class="text-[10px] font-extrabold text-emerald-700 block truncate">${act.label}</span>
+                            </div>
+                        </div>
+
+                        <!-- Descrição -->
+                        <p class="text-xs sm:text-sm text-slate-600 font-semibold leading-relaxed">
+                            "${escapeHtml(item.desc)}"
+                        </p>
+                    </div>
+
+                    <!-- Rodapé com Aplausos / Votação -->
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2 no-print">
+                        <button type="button" onclick="loadInventionIntoMaker('${item.id}')"
+                            class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
+                            🔧 Testar na Oficina
+                        </button>
+                        <button type="button" onclick="voteInvention('${item.id}')"
+                            class="btn-3d px-3.5 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-display font-bold text-xs sm:text-sm flex items-center gap-1.5">
+                            <span>👏</span> Aplaudir <span class="bg-white/80 px-1.5 py-0.2 rounded-lg text-xs font-sans font-extrabold">${item.votes}</span>
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function voteInvention(id) {
+            const inv = state.gallery.find(i => i.id === id);
+            if (!inv) return;
+            inv.votes = (inv.votes || 0) + 1;
+            sfx.collect();
+            saveToStorage();
+            renderGallery();
+        }
+
+        function loadInventionIntoMaker(id) {
+            const inv = state.gallery.find(i => i.id === id);
+            if (!inv) return;
+            state.makerSelection = {
+                problem: inv.problemId,
+                sensor: inv.sensorId,
+                action: inv.actionId
+            };
+            document.getElementById('invNameInput').value = inv.name;
+            document.getElementById('invDescInput').value = inv.desc;
+            renderMakerOptions();
+            updatePrototypeStage();
+            switchTab('maker');
+            testPrototypeAnimation();
+        }
+
+        function deleteInvention(id) {
+            if (!window.confirm('Remover esta invenção do mural deste navegador?')) return;
+            sfx.click();
+            state.gallery = state.gallery.filter(i => i.id !== id);
+            saveToStorage();
+            updateScoreboard();
+            renderGallery();
+        }
+
+        function exportGalleryJSON() {
+            const galleryForExport = galleryFilterRoomCode ? state.gallery.filter(item => item.roomCode === galleryFilterRoomCode) : state.gallery;
+            const payload = {
+                plataforma: 'TecnoKids Sala de Aula',
+                dataExportacao: new Date().toISOString(),
+                codigoSala: galleryFilterRoomCode,
+                equipeAtual: state.teamName,
+                estrelas: state.stars,
+                invencoesDaTurma: galleryForExport
+            };
+            const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `tecnokids_mural_turma_${new Date().toISOString().slice(0, 10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            showToast('💾', 'Arquivo da aula baixado com sucesso!');
+        }
+
+        // --- PORTAL DE COMPARTILHAMENTO PROFESSOR / ALUNO (SEM SERVIDOR) ---
+        const TEACHER_SESSION_KEY = 'tecnokids_teacher_session_v1';
+
+        function hidePortalAndGame() {
+            ['portalHome', 'teacherPortal', 'studentPortal', 'gameAppHeader', 'gameAppMain', 'gamePrivacyNote'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+        }
+
+        function parseStudentRoute() {
+            const parts = window.location.hash.slice(1).split('|');
+            if (parts[0] !== 'aluno') return null;
+            const safeDecode = value => { try { return decodeURIComponent(value || ''); } catch { return ''; } };
+            return {
+                code: safeDecode(parts[1]).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8),
+                title: safeDecode(parts[2]).slice(0, 48) || 'Sala de Invenções',
+                instructions: safeDecode(parts[3]).slice(0, 180) || 'Explore as estações, crie uma solução e prepare-se para apresentá-la.'
+            };
+        }
+
+        function renderAppRoute() {
+            hidePortalAndGame();
+            const route = window.location.hash.slice(1);
+            if (route === 'jogo') {
+                document.getElementById('gameAppHeader').classList.remove('hidden');
+                document.getElementById('gameAppMain').classList.remove('hidden');
+                document.getElementById('gamePrivacyNote').classList.remove('hidden');
+                document.getElementById('toast').classList.remove('hidden');
+                return;
+            }
+            if (route === 'professor') {
+                document.getElementById('teacherPortal').classList.remove('hidden');
+                try { activeTeacherSession = JSON.parse(localStorage.getItem(TEACHER_SESSION_KEY) || 'null'); } catch { activeTeacherSession = null; }
+                if (activeTeacherSession && typeof activeTeacherSession === 'object') {
+                    galleryFilterRoomCode = activeTeacherSession.code || null;
+                    renderGallery();
+                    updateScoreboard();
+                    document.getElementById('classTitleInput').value = activeTeacherSession.title || '';
+                    document.getElementById('classInstructionsInput').value = activeTeacherSession.instructions || '';
+                    document.getElementById('importStatus').textContent = `${state.gallery.filter(item => item.roomCode === galleryFilterRoomCode).length} projeto(s) neste mural. Importe novos arquivos da turma.`;
+                }
+                return;
+            }
+            activeStudentSession = parseStudentRoute();
+            if (activeStudentSession) {
+                document.getElementById('studentPortal').classList.remove('hidden');
+                document.getElementById('studentClassTitle').textContent = activeStudentSession.title;
+                document.getElementById('studentInstructions').textContent = activeStudentSession.instructions;
+                document.getElementById('studentTeamAlias').value = state.teamName === 'Equipe Exploradores' ? '' : state.teamName;
+                return;
+            }
+            document.getElementById('portalHome').classList.remove('hidden');
+        }
+
+        function goPortalHome() {
+            window.location.hash = '#inicio';
+            renderAppRoute();
+        }
+
+        function openTeacherPortal() {
+            window.location.hash = '#professor';
+            renderAppRoute();
+        }
+
+        function openStudentPortalFromCode() {
+            const code = document.getElementById('studentRoomCodeInput').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
+            window.location.hash = `#aluno|${encodeURIComponent(code || 'LIVRE')}|${encodeURIComponent(code ? 'Sala ' + code : 'Sala de Invenções')}|${encodeURIComponent('Explore as estações, crie uma invenção e exporte o projeto para o professor.')}`;
+            renderAppRoute();
+        }
+
+        function createClassShare() {
+            const pageUrl = new URL(window.location.href);
+            if (!['http:', 'https:'].includes(pageUrl.protocol) || pageUrl.hostname === 'github.com') {
+                document.getElementById('teacherRoomSummary').textContent = 'Publique o jogo em um endereço do site (por exemplo, GitHub Pages) antes de criar um QR Code para a turma.';
+                document.getElementById('teacherShareResult').classList.remove('hidden');
+                return;
+            }
+            const title = (document.getElementById('classTitleInput').value.trim() || 'Desafio de Invenções').slice(0, 48);
+            const instructions = document.getElementById('classInstructionsInput').value.trim().slice(0, 180);
+            let code = activeTeacherSession?.code;
+            if (!code) {
+                const random = new Uint32Array(1);
+                if (window.crypto && window.crypto.getRandomValues) window.crypto.getRandomValues(random);
+                else random[0] = Math.floor(Math.random() * 0xffffffff);
+                code = random[0].toString(36).toUpperCase().padStart(7, '0').slice(-7);
+            }
+            activeTeacherSession = { code, title, instructions };
+            localStorage.setItem(TEACHER_SESSION_KEY, JSON.stringify(activeTeacherSession));
+            galleryFilterRoomCode = code;
+            renderGallery();
+            updateScoreboard();
+            pageUrl.hash = `aluno|${encodeURIComponent(code)}|${encodeURIComponent(title)}|${encodeURIComponent(instructions)}`;
+            const shareLink = pageUrl.toString();
+            document.getElementById('teacherRoomSummary').textContent = `Sala ${code} • ${title}. O QR contém somente o link e as orientações da atividade.`;
+            document.getElementById('studentShareLink').value = shareLink;
+            document.getElementById('teacherShareResult').classList.remove('hidden');
+            document.getElementById('teacherQrPanel').classList.remove('hidden');
+            const qrHost = document.getElementById('teacherQrCode');
+            qrHost.replaceChildren();
+            if (typeof qrcode === 'function') {
+                try {
+                    const qr = qrcode(0, 'M');
+                    qr.addData(shareLink, 'Byte');
+                    qr.make();
+                    qrHost.innerHTML = qr.createSvgTag({ cellSize: 5, margin: 4, scalable: true });
+                } catch (error) {
+                    qrHost.textContent = 'Não foi possível gerar o QR Code. Copie o link acima.';
+                }
+            } else {
+                qrHost.textContent = 'A biblioteca de QR Code não carregou. Copie o link acima.';
+            }
+            document.getElementById('classTitleInput').value = title;
+            document.getElementById('importStatus').textContent = `${state.gallery.filter(item => item.roomCode === code).length} projeto(s) neste mural. Envie o QR aos alunos e importe os projetos após a atividade.`;
+        }
+
+        function startNewTeacherRoom() {
+            activeTeacherSession = null;
+            localStorage.removeItem(TEACHER_SESSION_KEY);
+            document.getElementById('teacherShareResult').classList.add('hidden');
+            document.getElementById('teacherQrPanel').classList.add('hidden');
+            createClassShare();
+        }
+
+        async function copyStudentLink() {
+            const input = document.getElementById('studentShareLink');
+            try {
+                await navigator.clipboard.writeText(input.value);
+                document.getElementById('copyLinkStatus').textContent = 'Link copiado.';
+            } catch {
+                input.focus();
+                input.select();
+                document.getElementById('copyLinkStatus').textContent = 'Selecione e copie o link.';
+            }
+        }
+
+        function downloadStudentQr() {
+            const svg = document.querySelector('#teacherQrCode svg');
+            if (!svg) return;
+            const blob = new Blob([svg.outerHTML], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `tecnokids-qr-${activeTeacherSession?.code || 'sala'}.svg`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+
+        function enterStudentGame() {
+            const alias = document.getElementById('studentTeamAlias').value.trim().slice(0, 40) || 'Equipe Exploradora';
+            state.teamName = alias;
+            state.roomCode = activeStudentSession?.code || '';
+            saveToStorage();
+            document.getElementById('teamNameInput').value = alias;
+            window.location.hash = '#jogo';
+            renderAppRoute();
+            showToast('🚀', `Boa criação, ${alias}!`);
+        }
+
+        async function exportStudentWork() {
+            const projects = state.gallery.filter(item => item.team === state.teamName && (state.roomCode ? item.roomCode === state.roomCode : !item.roomCode)).map(item => ({
+                id: String(item.id), team: state.teamName, name: String(item.name).slice(0, 60),
+                problemId: item.problemId, sensorId: item.sensorId, actionId: item.actionId,
+                desc: String(item.desc).slice(0, 240)
+            }));
+            if (!projects.length) {
+                showToast('📤', 'Salve uma invenção para gerar o arquivo do professor.');
+                return;
+            }
+            const payload = { type: 'tecnokids-student-projects', version: 1, roomCode: state.roomCode, exportedAt: new Date().toISOString(), projects };
+            const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `tecnokids-projetos-${state.roomCode || 'sala'}-${state.teamName.replace(/[^a-z0-9_-]/gi, '_')}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            showToast('✅', 'Arquivo pronto. Envie ao professor pelo canal combinado.');
+        }
+
+        async function importStudentWork(event) {
+            const files = Array.from(event.target.files || []);
+            const status = document.getElementById('importStatus');
+            if (!activeTeacherSession?.code) {
+                status.textContent = 'Crie a sala e compartilhe o QR antes de importar os projetos.';
+                event.target.value = '';
+                return;
+            }
+            if (files.length > 30 || files.some(file => file.size > 1024 * 1024)) {
+                status.textContent = 'Selecione até 30 arquivos JSON, com no máximo 1 MB cada.';
+                event.target.value = '';
+                return;
+            }
+            let imported = 0;
+            let rejected = 0;
+            for (const file of files) {
+                try {
+                    const payload = JSON.parse(await file.text());
+                    if (payload.type !== 'tecnokids-student-projects' || payload.version !== 1 || payload.roomCode !== activeTeacherSession.code || !Array.isArray(payload.projects)) {
+                        rejected++;
+                        continue;
+                    }
+                    for (const project of payload.projects.slice(0, 100)) {
+                        if (state.gallery.length >= 100) break;
+                        const problem = makerCatalog.problems.find(item => item.id === project.problemId);
+                        const sensor = makerCatalog.sensors.find(item => item.id === project.sensorId);
+                        const action = makerCatalog.actions.find(item => item.id === project.actionId);
+                        if (!problem || !sensor || !action || !project.id || !project.name) continue;
+                        const sourceKey = `${activeTeacherSession.code}:${String(project.id).slice(0, 50)}`;
+                        if (state.gallery.some(item => item.sourceKey === sourceKey)) continue;
+                        state.gallery.unshift({
+                            id: 'import_' + sourceKey.replace(/[^a-zA-Z0-9_-]/g, '_'), sourceKey,
+                            roomCode: activeTeacherSession.code,
+                            team: String(project.team || 'Equipe').slice(0, 40), name: String(project.name).slice(0, 60),
+                            problemId: problem.id, sensorId: sensor.id, actionId: action.id,
+                            desc: String(project.desc || '').slice(0, 240), votes: 0
+                        });
+                        imported++;
+                    }
+                } catch { rejected++; }
+            }
+            saveToStorage();
+            updateScoreboard();
+            renderGallery();
+            status.textContent = `${imported} projeto(s) importado(s) para este navegador.${rejected ? ` ${rejected} arquivo(s) ignorado(s): inválidos ou de outra sala.` : ''}`;
+            event.target.value = '';
+        }
+
+        function openTeacherGallery() {
+            window.location.hash = '#jogo';
+            renderAppRoute();
+            switchTab('gallery');
+        }
+
+        // --- UTILITÁRIOS ---
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        let toastTimeout;
+        function showToast(emoji, msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastEmoji').textContent = emoji;
+            document.getElementById('toastMsg').textContent = msg;
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 3400);
+        }
+    </script>
+</body>
+</html>
+
