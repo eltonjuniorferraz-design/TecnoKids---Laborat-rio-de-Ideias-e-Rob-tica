@@ -1,47 +1,47 @@
 # TecnoKids — Laboratório de Ideias
 
-Site educativo estático em português com três estações: missões de lógica, oficina maker e mural da turma. Inclui portal do professor, página para os alunos, compartilhamento por link/QR Code e importação de projetos para o mural de apresentação.
+Jogo educativo em português com três estações: missões de lógica, oficina maker e mural de apresentação. O portal do professor usa conta com e-mail e senha; os alunos entram na sala por link ou QR Code, sem e-mail ou senha, informando apenas o primeiro nome.
 
-## Fluxo de sala de aula
+## Como funciona a sala
 
-1. O professor abre **Espaço do Professor**, nomeia a atividade e cria o link e o QR Code.
-2. Os alunos escaneiam o código, escolhem um apelido de equipe e trabalham nas estações em seus próprios dispositivos.
-3. Cada equipe salva sua invenção no mural local e baixa o arquivo JSON para enviar ao professor pelo canal escolhido pela escola.
-4. O professor seleciona os arquivos recebidos em **Importar projetos dos alunos**. Os projetos são reunidos no mural daquele navegador para apresentação e impressão.
+1. O professor cria a conta, entra e prepara uma sala com atividade, link e QR Code.
+2. Cada aluno entra no próprio aparelho e informa somente o primeiro nome.
+3. A turma percorre as etapas em ordem: lógica → oficina maker → mural/apresentação. A próxima etapa fica bloqueada até concluir a anterior.
+4. O professor acompanha os nomes e a etapa atual da turma. Os projetos aparecem no mural compartilhado da sala.
 
-## Privacidade e limites
+## Dados e privacidade
 
-- Não há servidor, login, sincronização ao vivo, analytics ou formulário remoto. A galeria só aparece no mural do professor depois que os arquivos JSON são importados.
-- O código da sala, o nome curto da atividade e as orientações ficam no fragmento (`#...`) do link do aluno. O jogo não os envia a um servidor, mas qualquer pessoa com o link pode abrir a atividade. Não inclua informações pessoais ou sensíveis no título/instruções.
-- Os alunos devem usar apelidos de equipe. O arquivo JSON enviado ao professor inclui o apelido, o nome da invenção, sua descrição e escolhas maker. Revise os arquivos antes de compartilhá-los fora do canal da escola.
-- A sala e o mural do professor ficam no `localStorage` do navegador do professor. Os projetos dos alunos também ficam no navegador deles até a exportação. Para apresentar em outro computador, importe os arquivos nesse computador.
-- O QR é gerado no navegador. O jogo carrega Tailwind CSS e a biblioteca QR Code de CDNs externos; esses serviços recebem a solicitação normal do navegador para baixar o código da biblioteca, mas não recebem o link da sala nem os projetos.
+- O TecnoKids guarda no Supabase o e-mail de acesso do professor, o código e as orientações da sala, o primeiro nome dos alunos, o progresso e os projetos criados.
+- Alunos usam sessões anônimas sem e-mail. A sessão fica vinculada ao navegador/aparelho; se os dados do navegador forem apagados ou o aluno trocar de aparelho, ele pode perder a sessão anterior.
+- As regras do banco limitam o professor às próprias salas e os projetos aos participantes da mesma sala. O mural não é uma página pública aberta para busca.
+- O QR e o link são convites: compartilhe somente com a turma e encerre a sala quando não for mais usada. Evite sobrenomes, contatos e detalhes pessoais no título, orientações e projetos.
+- O professor deve revisar as regras da escola para dados de estudantes e apagar salas/projetos quando deixarem de ser necessários.
+- A entrada anônima pode ser alvo de criação automatizada de sessões. Para uso público amplo, configure CAPTCHA no Supabase e acompanhe os limites de uso do plano.
+- O jogo ainda usa CDNs públicos para Tailwind CSS, QR Code e cliente Supabase. Esses serviços recebem as solicitações normais de carregamento da biblioteca, não o conteúdo dos projetos.
 
-## Publicar sem linha de comando
+## Publicação no GitHub Pages
 
-### GitHub Pages
+Envie para a raiz do repositório todos estes arquivos:
 
-1. No GitHub, crie ou use um repositório e envie `index.html` para a raiz. Este arquivo já está nomeado como página inicial.
-2. Abra **Settings → Pages**. Em **Build and deployment**, escolha **Deploy from a branch**, selecione `main` e a pasta `/ (root)`, e salve.
-3. Aguarde a publicação indicada na mesma página. O endereço terá o formato `https://SEU-USUARIO.github.io/NOME-DO-REPOSITORIO/`.
-4. Abra o site publicado antes de criar o QR Code. O QR deve apontar para o endereço público do jogo.
+- `index.html`
+- `supabase-config.js`
+- `supabase-online.js`
 
-O [guia oficial do GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site) descreve a publicação de arquivos estáticos.
+O arquivo `supabase-config.js` contém a URL do projeto e a chave **publishable**, própria para navegador. Nunca coloque uma chave `secret` ou `service_role` nesse arquivo.
 
-### Netlify Drop
+O projeto Supabase **TecnoKids** foi criado em São Paulo. O esquema está em `supabase/schema.sql`; ele cria as tabelas e regras de acesso. Para aplicar em outro projeto, abra o SQL Editor no Supabase, cole o arquivo e execute.
 
-1. Acesse [Netlify Drop](https://app.netlify.com/drop).
-2. Arraste uma pasta contendo `index.html` para a área indicada.
-3. Use o link publicado para abrir o portal do professor e gerar o QR. Para atualizar, envie novamente a pasta.
+No GitHub, em **Settings → Pages**, escolha **Deploy from a branch**, `main` e `/ (root)`. Depois de publicado, confira o site:
 
-Veja o guia oficial de [criação de deploys do Netlify](https://docs.netlify.com/deploy/create-deploys/).
+[Abrir TecnoKids](https://eltonjuniorferraz-design.github.io/TecnoKids---Laborat-rio-de-Ideias-e-Rob-tica/)
 
-## Arquivos
+O GitHub Pages hospeda os arquivos estáticos; login e dados das salas ficam no Supabase.
 
-- `index.html` — site completo, pronto para publicação.
-- `LEIA-ME.md` — este guia.
+## Configurações do Supabase
 
-### Crédito da biblioteca QR
+O projeto já tem o banco do TecnoKids, e-mail/senha e sessões anônimas habilitadas. O endereço do GitHub Pages está configurado como destino padrão e permitido para recuperação de senha. O e-mail padrão do Supabase pode ter limites de envio; antes do uso amplo, configure um provedor SMTP próprio e o CAPTCHA.
 
-A geração do QR Code usa `qrcode-generator` 1.4.4, de Kazuhiko Arase, sob licença MIT. A cópia é servida pelo [cdnjs](https://cdnjs.com/libraries/qrcode-generator/1.4.4); veja a [licença MIT original](https://github.com/kazuhikoarase/qrcode-generator/blob/master/LICENSE). O QR é montado no navegador e o conteúdo do link não é enviado ao CDN.
+## Crédito da biblioteca QR
+
+A geração do QR Code usa `qrcode-generator` 1.4.4, de Kazuhiko Arase, sob licença MIT. Veja a [licença MIT](https://github.com/kazuhikoarase/qrcode-generator/blob/master/LICENSE). O QR é gerado no navegador.
 
