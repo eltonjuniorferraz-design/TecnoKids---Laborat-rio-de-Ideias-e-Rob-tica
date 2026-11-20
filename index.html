@@ -132,17 +132,19 @@
             <button type="button" onclick="goPortalHome()" class="mb-5 text-sm font-bold text-indigo-700 hover:text-indigo-950">← Início</button>
             <article id="teacherAuthPanel" class="max-w-xl mx-auto bg-white rounded-3xl p-6 sm:p-8 shadow-lg border-2 border-indigo-100">
                 <p class="text-sm font-extrabold uppercase tracking-widest text-indigo-600">Espaço do Professor</p>
-                <h1 class="font-display text-3xl font-bold text-indigo-950 mt-2">Entre para preparar sua sala</h1>
-                <p class="text-slate-600 mt-2">Use seu e-mail e senha. A recuperação da senha será enviada ao e-mail da conta.</p>
+                <h1 id="teacherAuthTitle" class="font-display text-3xl font-bold text-indigo-950 mt-2">Entre para preparar sua sala</h1>
+                <p id="teacherAuthIntro" class="text-slate-600 mt-2">Acesse sua conta com e-mail e senha. Ainda não tem uma conta? Você pode criar uma agora.</p>
                 <label for="teacherEmail" class="block text-sm font-extrabold text-slate-700 mt-5 mb-1">E-mail do professor</label>
                 <input id="teacherEmail" type="email" autocomplete="email" required class="w-full rounded-xl border-2 border-slate-200 px-4 py-3">
                 <label for="teacherPassword" class="block text-sm font-extrabold text-slate-700 mt-4 mb-1">Senha</label>
                 <input id="teacherPassword" type="password" autocomplete="current-password" minlength="8" required class="w-full rounded-xl border-2 border-slate-200 px-4 py-3">
-                <div class="grid sm:grid-cols-2 gap-3 mt-5">
-                    <button type="button" onclick="teacherAuth('signin')" class="btn-3d py-3 rounded-xl bg-indigo-600 text-white font-extrabold">Entrar</button>
-                    <button type="button" onclick="teacherAuth('signup')" class="btn-3d py-3 rounded-xl bg-amber-400 text-slate-950 font-extrabold">Criar conta</button>
+                <div id="teacherPasswordConfirmWrap" class="hidden">
+                    <label for="teacherPasswordConfirm" class="block text-sm font-extrabold text-slate-700 mt-4 mb-1">Confirme sua senha</label>
+                    <input id="teacherPasswordConfirm" type="password" autocomplete="new-password" minlength="8" class="w-full rounded-xl border-2 border-slate-200 px-4 py-3">
                 </div>
-                <button type="button" onclick="teacherPasswordReset()" class="mt-4 w-full py-2 text-indigo-700 font-bold hover:underline">Esqueci minha senha</button>
+                <button id="teacherAuthSubmit" type="button" onclick="teacherAuth('signin')" class="btn-3d mt-5 w-full py-3 rounded-xl bg-indigo-600 text-white font-extrabold">Entrar</button>
+                <button id="teacherAuthSwitch" type="button" onclick="setTeacherAuthMode('signup')" class="mt-3 w-full py-2 text-indigo-700 font-bold hover:underline">Criar conta de professor</button>
+                <button id="teacherPasswordResetButton" type="button" onclick="teacherPasswordReset()" class="mt-1 w-full py-2 text-indigo-700 font-bold hover:underline">Esqueci minha senha</button>
                 <p id="teacherAuthStatus" class="mt-3 text-sm font-semibold text-slate-600" aria-live="polite"></p>
                 <div id="passwordRecoveryPanel" class="hidden mt-4 rounded-2xl bg-sky-50 border border-sky-200 p-4">
                     <label for="teacherNewPassword" class="block text-sm font-extrabold text-slate-700 mb-1">Nova senha</label>
