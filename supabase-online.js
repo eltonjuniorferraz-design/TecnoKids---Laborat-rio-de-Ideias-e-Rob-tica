@@ -22,6 +22,36 @@
         }
     }
 
+    function setTeacherAuthMode(mode) {
+        const creating = mode === 'signup';
+        const title = document.getElementById('teacherAuthTitle');
+        const intro = document.getElementById('teacherAuthIntro');
+        const password = document.getElementById('teacherPassword');
+        const confirmWrap = document.getElementById('teacherPasswordConfirmWrap');
+        const submit = document.getElementById('teacherAuthSubmit');
+        const switchButton = document.getElementById('teacherAuthSwitch');
+        const resetButton = document.getElementById('teacherPasswordResetButton');
+        if (!title || !intro || !password || !confirmWrap || !submit || !switchButton || !resetButton) return;
+
+        title.textContent = creating ? 'Crie sua conta de professor' : 'Entre para preparar sua sala';
+        intro.textContent = creating
+            ? 'Informe seu e-mail e crie uma senha com pelo menos 8 caracteres. Enviaremos uma confirmação para seu e-mail.'
+            : 'Acesse sua conta com e-mail e senha. Ainda não tem uma conta? Você pode criar uma agora.';
+        password.autocomplete = creating ? 'new-password' : 'current-password';
+        confirmWrap.classList.toggle('hidden', !creating);
+        submit.textContent = creating ? 'Criar minha conta' : 'Entrar';
+        submit.setAttribute('onclick', `teacherAuth('${creating ? 'signup' : 'signin'}')`);
+        submit.classList.toggle('bg-indigo-600', !creating);
+        submit.classList.toggle('bg-amber-400', creating);
+        submit.classList.toggle('text-slate-950', creating);
+        submit.classList.toggle('text-white', !creating);
+        switchButton.textContent = creating ? 'Já tenho conta · Voltar para entrar' : 'Criar conta de professor';
+        switchButton.setAttribute('onclick', `setTeacherAuthMode('${creating ? 'signin' : 'signup'}')`);
+        resetButton.classList.toggle('hidden', creating);
+        document.getElementById('teacherPasswordConfirm').value = '';
+        status('');
+    }
+
     function isAnonymousSession(session) {
         try {
             const encoded = session?.access_token?.split('.')[1];
@@ -50,6 +80,11 @@
         const email = document.getElementById('teacherEmail').value.trim();
         const password = document.getElementById('teacherPassword').value;
         if (!email || !password) return status('Informe seu e-mail e sua senha.', true);
+        if (mode === 'signup') {
+            const confirmation = document.getElementById('teacherPasswordConfirm').value;
+            if (password.length < 8) return status('Crie uma senha com pelo menos 8 caracteres.', true);
+            if (password !== confirmation) return status('As senhas não coincidem. Confira os dois campos.', true);
+        }
         status('Conectando…');
         const result = mode === 'signup'
             ? await db.auth.signUp({ email, password })
@@ -402,6 +437,7 @@
     }
 
     window.teacherAuth = teacherAuth;
+    window.setTeacherAuthMode = setTeacherAuthMode;
     window.teacherPasswordReset = teacherPasswordReset;
     window.teacherUpdatePassword = teacherUpdatePassword;
     window.teacherSignOut = teacherSignOut;
