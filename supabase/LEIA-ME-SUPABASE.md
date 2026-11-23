@@ -12,7 +12,7 @@ Nunca substitua a chave pública por uma chave `secret` ou `service_role`. A cha
 
 ## Sala e etapas
 
-Cada sala pertence a um professor e tem um código de sete caracteres. Os alunos iniciam sessão anônima no navegador, informam apenas o primeiro nome e entram pelo link/QR. A ordem do jogo é missões de lógica → oficina maker → mural/apresentação. A interface oculta e bloqueia as etapas futuras; a função do banco aceita somente a etapa atual. O painel do professor atualiza a lista aproximadamente a cada sete segundos.
+Cada sala pertence a um professor e tem um código de sete caracteres. Os alunos iniciam sessão anônima no navegador, informam apenas o primeiro nome e entram pelo link/QR. Quatro das cinco missões de lógica liberam a oficina maker; a Fase 5 é opcional. Salvar o projeto libera o mural/apresentação. A função do banco aceita somente a etapa atual. O painel do professor atualiza a lista aproximadamente a cada sete segundos.
 
 ## Privacidade e operação
 
