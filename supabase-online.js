@@ -243,6 +243,7 @@
         currentStage = 1;
         const { data: progress } = await db.from('classroom_participants').select('current_stage').eq('id', user.id).maybeSingle();
         if (progress) currentStage = progress.current_stage;
+        await unlockMakerAfterFourMissions();
         state.teamName = firstName;
         state.roomCode = route.code;
         saveToStorage();
@@ -302,6 +303,13 @@
         return true;
     }
 
+    async function unlockMakerAfterFourMissions() {
+        if (!student || currentStage !== 1 || !Array.isArray(state.completedLevels) || state.completedLevels.length < 4) return false;
+        const done = await completeStage(1);
+        if (done) showToast('🔓', 'Quatro missões concluídas! A Oficina Maker foi liberada. A Fase 5 fica como desafio extra.');
+        return done;
+    }
+
     function applyStageAccess() {
         if (!student) return;
         const order = ['logic', 'maker', 'gallery'];
@@ -355,9 +363,7 @@
     const originalVictory = window.handleLevelVictory;
     window.handleLevelVictory = function () {
         originalVictory();
-        if (student && currentStage === 1 && Array.isArray(state.completedLevels) && state.completedLevels.length >= 5) {
-            completeStage(1).then(done => { if (done) showToast('🔓', 'Missões concluídas! A oficina maker foi liberada.'); });
-        }
+        unlockMakerAfterFourMissions();
     };
 
     const originalOpenTeacherGallery = window.openTeacherGallery;
@@ -423,6 +429,7 @@
                     activeStudentSession = { code, title: room.room_title, instructions: room.room_instructions, roomId: room.room_id };
                     const { data: progress } = await db.from('classroom_participants').select('current_stage').eq('id', user.id).maybeSingle();
                     currentStage = progress?.current_stage || 1;
+                    await unlockMakerAfterFourMissions();
                     document.getElementById('teamNameInput').value = firstName;
                     document.getElementById('teamNameInput').readOnly = true;
                     applyStageAccess();
