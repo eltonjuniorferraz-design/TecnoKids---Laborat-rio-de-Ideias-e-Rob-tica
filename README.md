@@ -6,7 +6,7 @@ Jogo educativo em português com três estações: missões de lógica, oficina 
 
 1. O professor cria a conta, entra e prepara uma sala com atividade, link e QR Code.
 2. Cada aluno entra no próprio aparelho e informa somente o primeiro nome.
-3. A turma percorre as etapas em ordem: lógica → oficina maker → mural/apresentação. A próxima etapa fica bloqueada até concluir a anterior.
+3. Na etapa de lógica, quatro das cinco missões liberam a oficina maker; a Fase 5 é um desafio extra. Depois, a oficina maker libera o mural/apresentação ao salvar o projeto.
 4. O professor acompanha os nomes e a etapa atual da turma. Os projetos aparecem no mural compartilhado da sala.
 
 ## Dados e privacidade
