@@ -12,7 +12,7 @@ Nunca substitua a chave pública por uma chave `secret` ou `service_role`. A cha
 
 ## Sala e etapas
 
-Cada sala pertence a um professor e tem um código de sete caracteres. Os alunos iniciam sessão anônima no navegador, informam apenas o primeiro nome e entram pelo link/QR. Quatro das cinco missões de lógica liberam a oficina maker; a Fase 5 é opcional. Salvar o projeto libera o mural/apresentação. A função do banco aceita somente a etapa atual. O painel do professor atualiza a lista aproximadamente a cada sete segundos.
+Cada sala pertence a um professor e tem um código de sete caracteres. Os alunos iniciam sessão anônima no navegador, informam apenas o primeiro nome e entram pelo link/QR. As três estações ficam disponíveis desde o início; os alunos podem alternar entre elas. O sistema registra a estação atual, as missões concluídas, o projeto salvo e a apresentação. O painel do professor atualiza a lista aproximadamente a cada sete segundos.
 
 ## Privacidade e operação
 
