@@ -174,7 +174,7 @@ begin
 end;
 $$;
 
--- A participant can advance only the current station, in order.
+-- Legacy sequential completion RPC retained for compatibility.
 create or replace function public.complete_classroom_stage(p_stage smallint)
 returns smallint
 language plpgsql
@@ -200,8 +200,35 @@ begin
 end;
 $$;
 
+-- Students may visit stations in any order; record the current station and completion.
+create or replace function public.track_classroom_activity(p_stage smallint, p_completed boolean default false)
+returns smallint
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare v_stage smallint;
+begin
+  if p_stage not between 1 and 3 then raise exception 'Atividade inválida.'; end if;
+
+  update public.classroom_participants
+  set current_stage = p_stage,
+      logic_complete = logic_complete or (p_stage = 1 and coalesce(p_completed, false)),
+      maker_complete = maker_complete or (p_stage = 2 and coalesce(p_completed, false)),
+      presentation_complete = presentation_complete or (p_stage = 3 and coalesce(p_completed, false)),
+      last_seen_at = now()
+  where id = auth.uid()
+  returning current_stage into v_stage;
+
+  if not found then raise exception 'Entre na sala antes de registrar a atividade.'; end if;
+  return v_stage;
+end;
+$$;
+
 revoke all on function public.join_classroom(text, text) from public, anon;
 revoke all on function public.complete_classroom_stage(smallint) from public, anon;
+revoke all on function public.track_classroom_activity(smallint, boolean) from public, anon;
 grant execute on function public.join_classroom(text, text) to authenticated;
 grant execute on function public.complete_classroom_stage(smallint) to authenticated;
+grant execute on function public.track_classroom_activity(smallint, boolean) to authenticated;
 
