@@ -12,6 +12,7 @@
     let rosterTimer = null;
     let studentGalleryTimer = null;
     let sessionReady = false;
+    let activityUpdateQueue = Promise.resolve();
     const stageLabels = ['Missões de lógica', 'Oficina maker', 'Mural e apresentação'];
 
     function status(message, isError = false) {
@@ -215,7 +216,8 @@
             const card = document.createElement('article');
             card.className = 'rounded-2xl border border-slate-200 bg-slate-50 p-3';
             const stage = Math.min(3, Math.max(1, Number(person.current_stage) || 1));
-            const progressText = person.presentation_complete ? 'Atividade concluída' : stage === 1 ? 'Em andamento' : 'Etapas anteriores concluídas';
+            const stageComplete = stage === 1 ? person.logic_complete : stage === 2 ? person.maker_complete : person.presentation_complete;
+            const progressText = stageComplete ? 'Atividade concluída' : 'Em andamento';
             card.innerHTML = `<p class="font-extrabold text-indigo-950">${escapeHtml(person.first_name)}</p><p class="mt-1 text-xs font-semibold text-slate-600">${escapeHtml(stageLabels[stage - 1])} · ${progressText}</p>`;
             host.appendChild(card);
         });
@@ -243,7 +245,6 @@
         currentStage = 1;
         const { data: progress } = await db.from('classroom_participants').select('current_stage').eq('id', user.id).maybeSingle();
         if (progress) currentStage = progress.current_stage;
-        await unlockMakerAfterFourMissions();
         state.teamName = firstName;
         state.roomCode = route.code;
         saveToStorage();
@@ -291,60 +292,56 @@
             updated_at: new Date().toISOString()
         }, { onConflict: 'participant_id' });
         if (error) showToast('⚠️', 'Não foi possível sincronizar o projeto: ' + error.message);
-        else await loadRoomGallery();
+        else {
+            await trackStudentActivity(2, true);
+            await loadRoomGallery();
+        }
     }
 
-    async function completeStage(stage) {
-        if (!db || !student || currentStage !== stage) return false;
-        const { data, error } = await db.rpc('complete_classroom_stage', { p_stage: stage });
-        if (error) { showToast('⚠️', error.message); return false; }
-        currentStage = Number(data) || Math.min(3, stage + 1);
-        applyStageAccess();
-        return true;
-    }
-
-    async function unlockMakerAfterFourMissions() {
-        if (!student || currentStage !== 1 || !Array.isArray(state.completedLevels) || state.completedLevels.length < 4) return false;
-        const done = await completeStage(1);
-        if (done) showToast('🔓', 'Quatro missões concluídas! A Oficina Maker foi liberada. A Fase 5 fica como desafio extra.');
-        return done;
+    function trackStudentActivity(stage, completed = false) {
+        if (!db || !student || ![1, 2, 3].includes(stage)) return false;
+        activityUpdateQueue = activityUpdateQueue.then(async () => {
+            const { data, error } = await db.rpc('track_classroom_activity', { p_stage: stage, p_completed: completed });
+            if (error) { showToast('⚠️', 'Não foi possível atualizar o progresso da atividade.'); return false; }
+            currentStage = Number(data) || stage;
+            return true;
+        });
+        return activityUpdateQueue;
     }
 
     function applyStageAccess() {
         if (!student) return;
-        const order = ['logic', 'maker', 'gallery'];
-        order.forEach((name, index) => {
+        const stations = ['logic', 'maker', 'gallery'];
+        stations.forEach(name => {
             const button = document.getElementById(`tabBtn_${name}`);
             if (!button) return;
-            const locked = index + 1 > currentStage;
-            button.disabled = locked;
-            button.setAttribute('aria-disabled', String(locked));
-            button.title = locked ? 'Conclua a etapa anterior para liberar.' : '';
-            button.classList.toggle('opacity-50', locked);
-            button.classList.toggle('cursor-not-allowed', locked);
+            button.disabled = false;
+            button.setAttribute('aria-disabled', 'false');
+            button.title = '';
+            button.classList.remove('opacity-50', 'cursor-not-allowed');
         });
         const finish = document.getElementById('finishPresentationBtn');
-        if (finish) finish.classList.toggle('hidden', currentStage < 3);
+        if (finish) finish.classList.remove('hidden');
     }
 
     async function completeStudentPresentation() {
-        const done = await completeStage(3);
-        if (done) {
-            await db.from('classroom_projects').update({ is_presented: true, updated_at: new Date().toISOString() }).eq('participant_id', student.id);
-            showToast('🎤', 'Apresentação concluída! O professor já pode acompanhar.');
-        }
+        if (!db || !student) return showToast('⚠️', 'Entre na sala para registrar sua apresentação.');
+        const { data: project, error: projectError } = await db.from('classroom_projects').select('id').eq('participant_id', student.id).maybeSingle();
+        if (projectError) return showToast('⚠️', 'Não foi possível verificar o projeto: ' + projectError.message);
+        if (!project) return showToast('💡', 'Salve sua invenção na Oficina Maker antes de concluir a apresentação.');
+        const { error } = await db.from('classroom_projects').update({ is_presented: true, updated_at: new Date().toISOString() }).eq('participant_id', student.id);
+        if (error) return showToast('⚠️', 'Não foi possível registrar a apresentação: ' + error.message);
+        await trackStudentActivity(3, true);
+        await loadRoomGallery();
+        showToast('🎤', 'Apresentação concluída! O professor já pode acompanhar.');
     }
 
     const originalSwitchTab = window.switchTab;
     window.switchTab = function (tab) {
-        if (student) {
-            const required = { logic: 1, maker: 2, gallery: 3 }[tab] || 1;
-            if (required > currentStage) {
-                showToast('🔒', 'Conclua a etapa atual para liberar a próxima.');
-                return;
-            }
-        }
-        return originalSwitchTab(tab);
+        const result = originalSwitchTab(tab);
+        const stage = { logic: 1, maker: 2, gallery: 3 }[tab];
+        if (student && stage) trackStudentActivity(stage, false);
+        return result;
     };
 
     const originalRenderAppRoute = window.renderAppRoute;
@@ -363,7 +360,9 @@
     const originalVictory = window.handleLevelVictory;
     window.handleLevelVictory = function () {
         originalVictory();
-        unlockMakerAfterFourMissions();
+        if (student && Array.isArray(state.completedLevels) && state.completedLevels.length >= 4) {
+            trackStudentActivity(1, true);
+        }
     };
 
     const originalOpenTeacherGallery = window.openTeacherGallery;
@@ -377,12 +376,7 @@
         const before = state.gallery.length;
         originalSaveInvention();
         if (!student || state.gallery.length <= before) return;
-        syncNewestProject().then(async () => {
-            if (currentStage === 2 && await completeStage(2)) {
-                originalSwitchTab('gallery');
-                showToast('🔓', 'Projeto salvo! O mural de apresentação foi liberado.');
-            }
-        });
+        syncNewestProject();
     };
 
     async function initialize() {
@@ -429,7 +423,6 @@
                     activeStudentSession = { code, title: room.room_title, instructions: room.room_instructions, roomId: room.room_id };
                     const { data: progress } = await db.from('classroom_participants').select('current_stage').eq('id', user.id).maybeSingle();
                     currentStage = progress?.current_stage || 1;
-                    await unlockMakerAfterFourMissions();
                     document.getElementById('teamNameInput').value = firstName;
                     document.getElementById('teamNameInput').readOnly = true;
                     applyStageAccess();
